@@ -13,5 +13,5 @@ app.include_router(health_router)
 @app.get("/")
 def home():
     return {
-        "message": "Welcome to AI Meeting Intelligence 🚀"
+        "message": "Welcome to AI Meeting Intelligence "
     }

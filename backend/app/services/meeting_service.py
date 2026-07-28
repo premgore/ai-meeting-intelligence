@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.repositories.meeting_repository import MeetingRepository
 from app.schemas.meeting import CreateMeetingRequest
+from app.schemas.meeting import UpdateMeetingRequest
 
 
 class MeetingService:
@@ -36,3 +37,37 @@ class MeetingService:
             )
 
         return meeting
+
+    @staticmethod
+    def update_meeting(
+    db: Session,
+    meeting_id: int,
+    request: UpdateMeetingRequest,
+    ):
+     meeting = MeetingRepository.get_by_id(db, meeting_id)
+
+     if meeting is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Meeting not found",
+        )
+
+     return MeetingRepository.update(
+        db=db,
+        meeting=meeting,
+        title=request.title,
+        description=request.description,
+    )
+    @staticmethod
+    def delete_meeting(
+    db: Session,
+    meeting_id: int,
+):
+        meeting = MeetingRepository.get_by_id(db, meeting_id)
+
+        if meeting is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Meeting not found",
+            )
+        MeetingRepository.delete(db, meeting)

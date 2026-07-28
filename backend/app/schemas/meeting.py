@@ -12,3 +12,8 @@ class MeetingResponse(BaseModel):
     description: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UpdateMeetingRequest(BaseModel):
+    title: str = Field(..., min_length=3, max_length=100)
+    description: str = Field(..., min_length=3)

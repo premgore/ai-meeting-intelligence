@@ -52,3 +52,23 @@ def get_meetings(
             for m in meetings
         ],
     )
+
+
+@router.get(
+    "/{meeting_id}",
+    response_model=ApiResponse[MeetingResponse],
+)
+def get_meeting(
+    meeting_id: int,
+    db: Session = Depends(get_db),
+):
+    meeting = MeetingService.get_meeting_by_id(
+        db,
+        meeting_id,
+    )
+
+    return ApiResponse(
+        success=True,
+        message="Meeting fetched successfully",
+        data=MeetingResponse.model_validate(meeting),
+    )

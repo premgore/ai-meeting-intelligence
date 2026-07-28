@@ -1,6 +1,10 @@
 from typing import List
 from fastapi import APIRouter
 from app.schemas.common import ApiResponse
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
 
 
 from app.schemas.meeting import (
@@ -13,27 +17,38 @@ router = APIRouter()
 
 
 @router.post(
-    "/meetings",
+    "/",
     response_model=ApiResponse[MeetingResponse],
 )
-def create_meeting(request: CreateMeetingRequest):
-    meeting = MeetingService.create_meeting(request)
+def create_meeting(
+    request: CreateMeetingRequest,
+    db: Session = Depends(get_db),
+):
+    meeting = MeetingService.create_meeting(
+        db=db,
+        request=request,
+    )
 
     return ApiResponse(
         success=True,
         message="Meeting created successfully",
-        data=MeetingResponse(**meeting),
+        data=MeetingResponse.model_validate(meeting),
     )
 
 @router.get(
-    "/meetings",
+    "/",
     response_model=ApiResponse[list[MeetingResponse]],
 )
-def get_all_meetings():
-    meetings = MeetingService.get_all_meetings()
+def get_meetings(
+    db: Session = Depends(get_db),
+):
+    meetings = MeetingService.get_all_meetings(db)
 
     return ApiResponse(
         success=True,
         message="Meetings fetched successfully",
-        data=[MeetingResponse(**meeting) for meeting in meetings],
+        data=[
+            MeetingResponse.model_validate(m)
+            for m in meetings
+        ],
     )

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CreateMeetingRequest(BaseModel):
@@ -10,3 +10,5 @@ class MeetingResponse(BaseModel):
     id: int
     title: str
     description: str
+
+    model_config = ConfigDict(from_attributes=True)

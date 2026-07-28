@@ -1,23 +1,21 @@
-from app.schemas.meeting import CreateMeetingRequest
+from sqlalchemy.orm import Session
 
-meetings = []
+from app.repositories.meeting_repository import MeetingRepository
+from app.schemas.meeting import CreateMeetingRequest
 
 
 class MeetingService:
+    @staticmethod
+    def create_meeting(
+        db: Session,
+        request: CreateMeetingRequest,
+    ):
+        return MeetingRepository.create(
+            db=db,
+            title=request.title,
+            description=request.description,
+        )
 
     @staticmethod
-    def create_meeting(request: CreateMeetingRequest):
-
-        meeting = {
-            "id": len(meetings) + 1,
-            "title": request.title,
-            "description": request.description,
-        }
-
-        meetings.append(meeting)
-
-        return meeting
-
-    @staticmethod
-    def get_all_meetings():
-        return meetings
+    def get_all_meetings(db: Session):
+        return MeetingRepository.get_all(db)

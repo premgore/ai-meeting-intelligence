@@ -5,4 +5,5 @@ class Base(DeclarativeBase):
     pass
 
 
+# Import all models so Alembic can discover them
 import app.models

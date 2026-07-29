@@ -1,7 +1,9 @@
-from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from datetime import datetime
 
-from app.db.base import Base
+from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.db.base_class import Base
 
 
 class Meeting(Base):
@@ -21,4 +23,25 @@ class Meeting(Base):
     description: Mapped[str] = mapped_column(
         String(500),
         nullable=False,
+    )
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    user = relationship(
+        "User",
+        back_populates="meetings",
     )

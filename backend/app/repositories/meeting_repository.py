@@ -9,10 +9,12 @@ class MeetingRepository:
         db: Session,
         title: str,
         description: str,
+        user_id: int,
     ) -> Meeting:
         meeting = Meeting(
             title=title,
             description=description,
+            user_id=user_id,
         )
 
         db.add(meeting)
@@ -23,7 +25,16 @@ class MeetingRepository:
 
     @staticmethod
     def get_all(db: Session) -> list[Meeting]:
-        return db.query(Meeting).all()
+        @staticmethod
+        def get_all(
+            db: Session,
+            user_id: int,
+        ):
+            return (
+        db.query(Meeting)
+        .filter(Meeting.user_id == user_id)
+        .all()
+        )
 
     @staticmethod
     def get_by_id(

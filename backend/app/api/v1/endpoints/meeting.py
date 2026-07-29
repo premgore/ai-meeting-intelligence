@@ -31,6 +31,7 @@ def create_meeting(
     meeting = MeetingService.create_meeting(
         db=db,
         request=request,
+        current_user=current_user,
     )
 
     return ApiResponse(
@@ -47,7 +48,7 @@ def get_meetings(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    meetings = MeetingService.get_all_meetings(db)
+    meetings = MeetingService.get_all_meetings(db,current_user=current_user,)
 
     return ApiResponse(
         success=True,
@@ -71,6 +72,7 @@ def get_meeting(
     meeting = MeetingService.get_meeting_by_id(
         db,
         meeting_id,
+        current_user=current_user,
     )
 
     return ApiResponse(

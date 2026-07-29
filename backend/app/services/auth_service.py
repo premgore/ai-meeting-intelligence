@@ -9,25 +9,24 @@ from app.core.security import (
     verify_password,
 )
 from app.repositories.user_repository import UserRepository
-from app.schemas.auth import (
-    LoginRequest,
-    TokenResponse,
-)
+from app.schemas.auth import TokenResponse
 
 
 class AuthService:
     @staticmethod
     def login(
         db: Session,
-        request: LoginRequest,
+        email: str,
+        password: str,
     ) -> TokenResponse:
         """
-        Authenticate user and generate JWT token.
+        Authenticate user and generate JWT access token.
         """
 
+        # Find user by email
         user = UserRepository.get_by_email(
             db,
-            request.email,
+            email,
         )
 
         if not user:
@@ -36,8 +35,9 @@ class AuthService:
                 detail="Invalid email or password",
             )
 
+        # Verify password
         if not verify_password(
-            request.password,
+            password,
             user.password,
         ):
             raise HTTPException(
@@ -45,10 +45,9 @@ class AuthService:
                 detail="Invalid email or password",
             )
 
+        # Generate JWT token
         access_token = create_access_token(
-            data={
-                "sub": user.email,
-            },
+            data={"sub": user.email},
             expires_delta=timedelta(
                 minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
             ),

@@ -1,9 +1,4 @@
-from sqlalchemy.orm import DeclarativeBase
+from app.db.base_class import Base
 
-
-class Base(DeclarativeBase):
-    pass
-
-
-# Import all models so Alembic can discover them
-import app.models
+from app.models.user import User
+from app.models.meeting import Meeting

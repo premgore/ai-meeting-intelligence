@@ -1,15 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean
-from sqlalchemy import DateTime
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base
-
-
+from app.db.base_class import Base
 class User(Base):
     __tablename__ = "users"
 
@@ -51,4 +45,10 @@ class User(Base):
         DateTime,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
+    )
+
+    meetings = relationship(
+    "Meeting",
+    back_populates="user",
+    cascade="all, delete-orphan",
     )

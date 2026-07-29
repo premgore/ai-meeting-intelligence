@@ -5,6 +5,7 @@ from app.core.logger import logger
 from app.repositories.meeting_repository import MeetingRepository
 from app.schemas.meeting import CreateMeetingRequest
 from app.schemas.meeting import UpdateMeetingRequest
+from app.models.user import User
 
 
 class MeetingService:
@@ -13,6 +14,7 @@ class MeetingService:
     def create_meeting(
         db: Session,
         request: CreateMeetingRequest,
+        current_user: User,
     ):
         logger.info("Creating a new meeting")
 
@@ -20,6 +22,8 @@ class MeetingService:
             db=db,
             title=request.title,
             description=request.description,
+            user_id=current_user.id,
+            
         )
 
         logger.info(
@@ -29,8 +33,8 @@ class MeetingService:
         return meeting
 
     @staticmethod
-    def get_all_meetings(db: Session):
-        meetings = MeetingRepository.get_all(db)
+    def get_all_meetings(db: Session, current_user: User,):
+        meetings = MeetingRepository.get_all(db, user_id=current_user.id)
 
         logger.info(
             f"Fetched {len(meetings)} meeting(s)"

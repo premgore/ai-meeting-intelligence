@@ -1,0 +1,27 @@
+from pydantic import BaseModel, EmailStr
+
+
+class LoginRequest(BaseModel):
+    """
+    Login request schema.
+    """
+
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(BaseModel):
+    """
+    JWT token response.
+    """
+
+    access_token: str
+    token_type: str = "bearer"
+
+
+class TokenData(BaseModel):
+    """
+    JWT payload data.
+    """
+
+    email: EmailStr

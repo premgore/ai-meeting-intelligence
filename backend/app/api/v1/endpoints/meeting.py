@@ -5,6 +5,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.meeting import UpdateMeetingRequest
+from fastapi import Depends
+from app.core.security import get_current_user
+from app.models.user import User
 
 
 from app.schemas.meeting import (
@@ -23,6 +26,7 @@ router = APIRouter()
 def create_meeting(
     request: CreateMeetingRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     meeting = MeetingService.create_meeting(
         db=db,
@@ -41,6 +45,7 @@ def create_meeting(
 )
 def get_meetings(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     meetings = MeetingService.get_all_meetings(db)
 
@@ -61,6 +66,7 @@ def get_meetings(
 def get_meeting(
     meeting_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     meeting = MeetingService.get_meeting_by_id(
         db,

@@ -8,7 +8,7 @@ from app.schemas.meeting import UpdateMeetingRequest
 from fastapi import Depends
 from app.core.security import get_current_user
 from app.models.user import User
-
+from fastapi import UploadFile, File
 
 from app.schemas.meeting import (
     CreateMeetingRequest,
@@ -119,4 +119,31 @@ def delete_meeting(
         success=True,
         message="Meeting deleted successfully",
         data=None,
+    )
+
+@router.post(
+    "/{meeting_id}/upload-audio",
+    response_model=ApiResponse[MeetingResponse],
+)
+def upload_audio(
+    meeting_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Upload an audio file for a meeting.
+    """
+
+    meeting = MeetingService.upload_audio(
+        db=db,
+        meeting_id=meeting_id,
+        file=file,
+        current_user=current_user,
+    )
+
+    return ApiResponse(
+        success=True,
+        message="Audio uploaded successfully",
+        data=MeetingResponse.model_validate(meeting),
     )

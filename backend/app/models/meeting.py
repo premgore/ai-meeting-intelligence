@@ -45,3 +45,8 @@ class Meeting(Base):
         "User",
         back_populates="meetings",
     )
+
+    audio_path: Mapped[str | None] = mapped_column(
+    String(500),
+    nullable=True,
+    )

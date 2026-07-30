@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 
 from app.models.meeting import Meeting
 
-
 class MeetingRepository:
     @staticmethod
     def create(
@@ -67,4 +66,14 @@ class MeetingRepository:
     def delete(db: Session, meeting: Meeting) -> None:
         db.delete(meeting)
         db.commit()
-    
+
+    @staticmethod
+    def update_audio_path(
+    db: Session,
+    meeting: Meeting,
+    audio_path: str,
+    ):
+        meeting.audio_path = audio_path
+        db.commit()
+        db.refresh(meeting)
+        return meeting

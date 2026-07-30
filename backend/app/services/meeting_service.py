@@ -6,6 +6,9 @@ from app.repositories.meeting_repository import MeetingRepository
 from app.schemas.meeting import CreateMeetingRequest
 from app.schemas.meeting import UpdateMeetingRequest
 from app.models.user import User
+from fastapi import UploadFile
+
+from app.services.audio_service import AudioService
 
 
 class MeetingService:
@@ -130,3 +133,52 @@ class MeetingService:
         logger.info(
             f"Meeting deleted successfully with ID={meeting_id}"
         )
+        
+    @staticmethod
+    def upload_audio(
+        db: Session,
+        meeting_id: int,
+        file: UploadFile,
+        current_user: User,
+    ):
+        """
+        Upload audio for a meeting.
+        """
+
+        logger.info(
+            f"Uploading audio for meeting ID={meeting_id}"
+        )
+
+        meeting = MeetingRepository.get_by_id(
+            db,
+            meeting_id,
+        )
+
+        if meeting is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Meeting not found",
+            )
+
+        # Verify meeting ownership
+        if meeting.user_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="You are not allowed to upload audio for this meeting.",
+            )
+
+        # Save audio file
+        audio_path = AudioService.save_audio(file)
+
+        # Update database
+        meeting = MeetingRepository.update_audio_path(
+            db=db,
+            meeting=meeting,
+            audio_path=audio_path,
+        )
+
+        logger.info(
+            f"Audio uploaded successfully for meeting ID={meeting_id}"
+        )
+
+        return meeting

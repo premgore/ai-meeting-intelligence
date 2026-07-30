@@ -114,3 +114,23 @@ class MeetingRepository:
         db.refresh(meeting)
 
         return meeting
+
+    @staticmethod
+    def get_all_with_transcripts(
+        db: Session,
+        user_id: int,
+    ) -> list[Meeting]:
+        """
+        Fetch all meetings for a user that have transcripts.
+        Used by the AI Chat feature.
+        """
+
+        return (
+            db.query(Meeting)
+            .filter(
+                Meeting.user_id == user_id,
+                Meeting.transcript.isnot(None),
+            )
+            .order_by(Meeting.id.desc())
+            .all()
+        )

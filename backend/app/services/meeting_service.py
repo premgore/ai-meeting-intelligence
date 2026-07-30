@@ -10,6 +10,7 @@ from fastapi import UploadFile
 
 from app.services.audio_service import AudioService
 from app.services.transcription_service import TranscriptionService
+from app.services.summary_service import SummaryService
 
 
 
@@ -230,4 +231,53 @@ class MeetingService:
 
         return meeting
 
-    
+    @staticmethod
+    def summarize_meeting(
+            db: Session,
+            meeting_id: int,
+            current_user: User,
+        ):
+            logger.info(f"Generating AI summary for meeting ID={meeting_id}")
+
+            meeting = MeetingRepository.get_by_id(db, meeting_id)
+
+            if meeting is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Meeting not found",
+                )
+
+            # Verify ownership
+            if meeting.user_id != current_user.id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You are not allowed to access this meeting.",
+                )
+
+            if not meeting.transcript:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Meeting transcript not found. Please transcribe the meeting first.",
+                )
+
+            ai_result = SummaryService.generate_summary(
+                meeting.transcript
+            )
+
+            meeting = MeetingRepository.update_ai_summary(
+                db=db,
+                meeting=meeting,
+                summary=ai_result.get("summary", ""),
+                action_items=ai_result.get("action_items", []),
+                key_decisions=ai_result.get("key_decisions", []),
+                risks=ai_result.get("risks", []),
+                sentiment=ai_result.get("sentiment", ""),
+            )
+
+            logger.info(
+                f"AI summary generated successfully for meeting ID={meeting_id}"
+            )
+
+            return meeting
+
+        

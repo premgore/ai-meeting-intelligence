@@ -24,16 +24,14 @@ class MeetingRepository:
         return meeting
 
     @staticmethod
-    def get_all(db: Session) -> list[Meeting]:
-        @staticmethod
-        def get_all(
-            db: Session,
-            user_id: int,
-        ):
-            return (
-        db.query(Meeting)
-        .filter(Meeting.user_id == user_id)
-        .all()
+    def get_all(
+        db: Session,
+        user_id: int,
+    ) -> list[Meeting]:
+        return (
+            db.query(Meeting)
+            .filter(Meeting.user_id == user_id)
+            .all()
         )
 
     @staticmethod
@@ -60,32 +58,57 @@ class MeetingRepository:
         db.commit()
         db.refresh(meeting)
 
-        return meeting 
-
+        return meeting
 
     @staticmethod
-    def delete(db: Session, meeting: Meeting) -> None:
+    def delete(
+        db: Session,
+        meeting: Meeting,
+    ) -> None:
         db.delete(meeting)
         db.commit()
 
     @staticmethod
     def update_audio_path(
-    db: Session,
-    meeting: Meeting,
-    audio_path: str,
-    ):
+        db: Session,
+        meeting: Meeting,
+        audio_path: str,
+    ) -> Meeting:
         meeting.audio_path = audio_path
+
         db.commit()
         db.refresh(meeting)
+
         return meeting
 
     @staticmethod
     def update_transcript(
-    db: Session,
-    meeting: Meeting,
-    transcript: str,
-    ):
+        db: Session,
+        meeting: Meeting,
+        transcript: str,
+    ) -> Meeting:
         meeting.transcript = transcript
+
+        db.commit()
+        db.refresh(meeting)
+
+        return meeting
+
+    @staticmethod
+    def update_ai_summary(
+        db: Session,
+        meeting: Meeting,
+        summary: str,
+        action_items: list,
+        key_decisions: list,
+        risks: list,
+        sentiment: str,
+    ) -> Meeting:
+        meeting.summary = summary
+        meeting.action_items = action_items
+        meeting.key_decisions = key_decisions
+        meeting.risks = risks
+        meeting.sentiment = sentiment
 
         db.commit()
         db.refresh(meeting)

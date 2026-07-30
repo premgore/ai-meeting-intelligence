@@ -1,10 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
 
 
 class Meeting(Base):
@@ -48,7 +47,37 @@ class Meeting(Base):
     )
 
     audio_path: Mapped[str | None] = mapped_column(
-    String(500),
-    nullable=True,
+        String(500),
+        nullable=True,
     )
-    transcript = Column(Text, nullable=True)
+
+    transcript: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    # AI Generated Insights
+    summary: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    action_items: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    key_decisions: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    risks: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    sentiment: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
+    )

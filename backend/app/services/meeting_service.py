@@ -12,6 +12,7 @@ from app.services.audio_service import AudioService
 from app.services.transcription_service import TranscriptionService
 
 
+
 class MeetingService:
 
     @staticmethod
@@ -228,3 +229,5 @@ class MeetingService:
         )
 
         return meeting
+
+    

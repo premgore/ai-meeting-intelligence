@@ -6,12 +6,16 @@ class Settings(BaseSettings):
     APP_ENV: str
     APP_VERSION: str
     APP_PORT: int
+
     DATABASE_URL: str
+
     LOG_LEVEL: str = "INFO"
+
     JWT_SECRET: str
     JWT_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
-   
+
+    GROQ_API_KEY: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

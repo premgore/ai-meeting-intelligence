@@ -13,7 +13,8 @@ from app.services.transcription_service import TranscriptionService
 from app.services.summary_service import SummaryService
 from app.services.pdf_service import PDFService
 from fastapi import HTTPException, status
-
+from app.services.email_service import EmailService
+from app.schemas.meeting import SendMeetingReportRequest
 
 class MeetingService:
 
@@ -305,4 +306,57 @@ class MeetingService:
 
         return pdf_path
 
-            
+    @staticmethod
+    def send_meeting_report(
+            db: Session,
+            meeting_id: int,
+            current_user: User,
+            request: SendMeetingReportRequest,
+        ):
+            logger.info(
+                f"Sending meeting report for meeting ID={meeting_id}"
+            )
+
+            meeting = MeetingRepository.get_by_id(
+                db,
+                meeting_id,
+            )
+
+            if meeting is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Meeting not found",
+                )
+
+            # Ownership check
+            if meeting.user_id != current_user.id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You are not authorized to access this meeting.",
+                )
+
+            # Always generate the latest PDF
+            pdf_path = PDFService.generate_report(meeting)
+
+            EmailService.send_meeting_report(
+                recipients=request.recipients,
+                subject=f"Meeting Report - {meeting.title}",
+                body=(
+                    f"Hello,\n\n"
+                    f"Please find the attached AI meeting report for "
+                    f"'{meeting.title}'.\n\n"
+                    f"Regards,\n"
+                    f"AI Meeting Intelligence"
+                ),
+                attachment_path=pdf_path,
+            )
+
+            logger.info(
+                f"Meeting report emailed successfully for meeting ID={meeting_id}"
+            )
+
+            return {
+                "message": "Meeting report sent successfully."
+            }
+
+                

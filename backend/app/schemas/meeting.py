@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class CreateMeetingRequest(BaseModel):
@@ -48,4 +48,18 @@ class UpdateMeetingRequest(BaseModel):
         ...,
         min_length=10,
         max_length=500,
+    )
+
+
+class SendMeetingReportRequest(BaseModel):
+    recipients: list[EmailStr] = Field(
+        ...,
+        min_length=1,
+        description="Email recipients",
+        examples=[
+            [
+                "prem@example.com",
+                "manager@example.com",
+            ]
+        ],
     )

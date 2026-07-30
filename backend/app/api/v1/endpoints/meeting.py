@@ -8,6 +8,7 @@ from app.schemas.common import ApiResponse
 from app.schemas.meeting import (
     CreateMeetingRequest,
     MeetingResponse,
+    SendMeetingReportRequest,
     UpdateMeetingRequest,
 )
 from app.services.meeting_service import MeetingService
@@ -204,4 +205,27 @@ def download_report(
         path=pdf_path,
         media_type="application/pdf",
         filename=f"meeting_{meeting_id}_report.pdf",
+    )
+
+@router.post(
+    "/{meeting_id}/send-report",
+    response_model=ApiResponse[dict],
+)
+def send_meeting_report(
+    meeting_id: int,
+    request: SendMeetingReportRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = MeetingService.send_meeting_report(
+        db=db,
+        meeting_id=meeting_id,
+        current_user=current_user,
+        request=request,
+    )
+
+    return ApiResponse(
+        success=True,
+        message="Meeting report sent successfully",
+        data=result,
     )

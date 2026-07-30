@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 
 from app.models.meeting import Meeting
+from backend.app import db
+from backend.app.schemas import meeting
 
 class MeetingRepository:
     @staticmethod
@@ -76,4 +78,17 @@ class MeetingRepository:
         meeting.audio_path = audio_path
         db.commit()
         db.refresh(meeting)
+        return meeting
+
+    @staticmethod
+    def update_transcript(
+    db: Session,
+    meeting: Meeting,
+    transcript: str,
+    ):
+        meeting.transcript = transcript
+
+        db.commit()
+        db.refresh(meeting)
+
         return meeting

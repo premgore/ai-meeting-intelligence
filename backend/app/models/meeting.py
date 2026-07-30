@@ -4,6 +4,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
+from sqlalchemy import Column, Integer, String, Text, ForeignKey
 
 
 class Meeting(Base):
@@ -50,3 +51,4 @@ class Meeting(Base):
     String(500),
     nullable=True,
     )
+    transcript = Column(Text, nullable=True)

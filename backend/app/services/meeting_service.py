@@ -11,7 +11,8 @@ from fastapi import UploadFile
 from app.services.audio_service import AudioService
 from app.services.transcription_service import TranscriptionService
 from app.services.summary_service import SummaryService
-
+from app.services.pdf_service import PDFService
+from fastapi import HTTPException, status
 
 
 class MeetingService:
@@ -280,4 +281,28 @@ class MeetingService:
 
             return meeting
 
-        
+    @staticmethod
+    def generate_meeting_report(
+        db,
+        meeting_id: int,
+        current_user,
+    ):
+        meeting = MeetingRepository.get_by_id(db, meeting_id)
+
+        if meeting is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Meeting not found",
+            )
+
+        if meeting.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to access this meeting",
+            )
+
+        pdf_path = PDFService.generate_report(meeting)
+
+        return pdf_path
+
+            

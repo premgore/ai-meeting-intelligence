@@ -11,7 +11,7 @@ from app.schemas.meeting import (
     UpdateMeetingRequest,
 )
 from app.services.meeting_service import MeetingService
-
+from fastapi.responses import FileResponse
 router = APIRouter()
 
 
@@ -186,4 +186,22 @@ def summarize_meeting(
         success=True,
         message="Meeting summarized successfully",
         data=MeetingResponse.model_validate(meeting),
+    )
+
+@router.get("/{meeting_id}/report")
+def download_report(
+    meeting_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    pdf_path = MeetingService.generate_meeting_report(
+        db=db,
+        meeting_id=meeting_id,
+        current_user=current_user,
+    )
+
+    return FileResponse(
+        path=pdf_path,
+        media_type="application/pdf",
+        filename=f"meeting_{meeting_id}_report.pdf",
     )

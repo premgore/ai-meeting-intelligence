@@ -147,3 +147,24 @@ def upload_audio(
         message="Audio uploaded successfully",
         data=MeetingResponse.model_validate(meeting),
     )
+
+@router.post(
+    "/{meeting_id}/transcribe",
+    response_model=ApiResponse[MeetingResponse],
+)
+def transcribe_meeting(
+    meeting_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    meeting = MeetingService.transcribe_meeting(
+        db=db,
+        meeting_id=meeting_id,
+        current_user=current_user,
+    )
+
+    return ApiResponse(
+        success=True,
+        message="Meeting transcribed successfully",
+        data=MeetingResponse.model_validate(meeting),
+    )

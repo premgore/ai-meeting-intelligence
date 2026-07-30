@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models.meeting import Meeting
-from backend.app import db
-from backend.app.schemas import meeting
+
 
 class MeetingRepository:
     @staticmethod

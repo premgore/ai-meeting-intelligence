@@ -9,6 +9,7 @@ from app.models.user import User
 from fastapi import UploadFile
 
 from app.services.audio_service import AudioService
+from app.services.transcription_service import TranscriptionService
 
 
 class MeetingService:
@@ -133,7 +134,7 @@ class MeetingService:
         logger.info(
             f"Meeting deleted successfully with ID={meeting_id}"
         )
-        
+
     @staticmethod
     def upload_audio(
         db: Session,
@@ -179,6 +180,51 @@ class MeetingService:
 
         logger.info(
             f"Audio uploaded successfully for meeting ID={meeting_id}"
+        )
+
+        return meeting
+
+    @staticmethod
+    def transcribe_meeting(
+        db: Session,
+        meeting_id: int,
+        current_user: User,
+    ):
+        logger.info(f"Starting transcription for meeting ID={meeting_id}")
+
+        meeting = MeetingRepository.get_by_id(db, meeting_id)
+
+        if meeting is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Meeting not found",
+            )
+
+        # Ownership check
+        if meeting.user_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="You are not allowed to access this meeting.",
+            )
+
+        if not meeting.audio_path:
+            raise HTTPException(
+                status_code=400,
+                detail="No audio uploaded for this meeting.",
+            )
+
+        transcript = TranscriptionService.transcribe(
+            meeting.audio_path
+        )
+
+        meeting = MeetingRepository.update_transcript(
+            db=db,
+            meeting=meeting,
+            transcript=transcript,
+        )
+
+        logger.info(
+            f"Transcription completed for meeting ID={meeting_id}"
         )
 
         return meeting

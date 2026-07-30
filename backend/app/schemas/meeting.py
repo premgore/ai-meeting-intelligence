@@ -21,6 +21,7 @@ class MeetingResponse(BaseModel):
     id: int
     title: str
     description: str
+    transcript: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

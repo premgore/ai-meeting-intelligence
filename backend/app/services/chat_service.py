@@ -64,15 +64,10 @@ reply with:
 
 "I couldn't find that information in your meetings."
 
-==========================
-MEETING DATA
-==========================
+
 
 {context}
 
-==========================
-QUESTION
-==========================
 
 {question}
 """

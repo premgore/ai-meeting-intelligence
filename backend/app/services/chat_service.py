@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.groq_client import client
 from app.models.user import User
-from app.repositories.meeting_repository import MeetingRepository
+from app.services.semantic_search_service import SemanticSearchService
 
 
 class ChatService:
@@ -15,15 +15,18 @@ class ChatService:
         question: str,
     ) -> str:
 
-        meetings = MeetingRepository.get_all_with_transcripts(
+        # Retrieve only the most relevant meetings using vector search
+        meetings = SemanticSearchService.search(
             db=db,
-            user_id=current_user.id,
+            current_user=current_user,
+            query=question,
+            limit=5,
         )
 
         if not meetings:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No meeting transcripts found.",
+                detail="No relevant meetings found.",
             )
 
         context = ""
@@ -57,17 +60,18 @@ Sentiment:
         prompt = f"""
 You are an AI Meeting Assistant.
 
-Answer ONLY using the meeting information below.
+Answer the user's question ONLY using the meeting information below.
 
-If the answer does not exist in the meetings,
-reply with:
+If the answer cannot be found in the provided meetings,
+reply exactly:
 
 "I couldn't find that information in your meetings."
 
-
+Meeting Context:
 
 {context}
 
+User Question:
 
 {question}
 """

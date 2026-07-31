@@ -16,6 +16,8 @@ from fastapi import HTTPException, status
 from app.services.email_service import EmailService
 from app.schemas.meeting import SendMeetingReportRequest
 
+from app.services.embedding_service import EmbeddingService
+
 class MeetingService:
 
     @staticmethod
@@ -266,6 +268,12 @@ class MeetingService:
                 meeting.transcript
             )
 
+            logger.info("Generating embedding...")
+
+            embedding = EmbeddingService.generate_embedding(
+                meeting.transcript
+            )
+
             meeting = MeetingRepository.update_ai_summary(
                 db=db,
                 meeting=meeting,
@@ -274,8 +282,8 @@ class MeetingService:
                 key_decisions=ai_result.get("key_decisions", []),
                 risks=ai_result.get("risks", []),
                 sentiment=ai_result.get("sentiment", ""),
+                embedding=embedding,
             )
-
             logger.info(
                 f"AI summary generated successfully for meeting ID={meeting_id}"
             )

@@ -134,3 +134,25 @@ class MeetingRepository:
             .order_by(Meeting.id.desc())
             .all()
         )
+    @staticmethod
+    def update_ai_summary(
+        db: Session,
+        meeting: Meeting,
+        summary: str,
+        action_items: list,
+        key_decisions: list,
+        risks: list,
+        sentiment: str,
+        embedding: list[float],
+    ) -> Meeting:
+        meeting.summary = summary
+        meeting.action_items = action_items
+        meeting.key_decisions = key_decisions
+        meeting.risks = risks
+        meeting.sentiment = sentiment
+        meeting.embedding = embedding
+
+        db.commit()
+        db.refresh(meeting)
+
+        return meeting

@@ -1,49 +1,32 @@
-from langchain_core.tools import StructuredTool
-
-from sqlalchemy.orm import Session
-
-from app.models.user import User
 from app.repositories.meeting_repository import MeetingRepository
+from app.tools.base_tool import MeetingBaseTool
 
 
-def get_action_items(
-    db: Session,
-    current_user: User,
-) -> str:
-    """
-    Return all action items from the user's meetings.
-    """
+class ActionItemsTool(MeetingBaseTool):
 
-    meetings = MeetingRepository.get_all_with_action_items(
-        db=db,
-        user_id=current_user.id,
-    )
+    name = "get_action_items"
 
-    if not meetings:
-        return "No action items found."
+    description = "Return action items."
 
-    result = ""
+    def _run(self) -> str:
 
-    for meeting in meetings:
+        meetings = (
+            MeetingRepository.get_all_with_action_items(
+                self.context.db,
+                self.context.current_user.id,
+            )
+        )
 
-        result += f"""
-Meeting {meeting.id}
-Title: {meeting.title}
+        if not meetings:
+            return "No action items."
 
-"""
+        result = ""
 
-        for item in meeting.action_items or []:
-            result += f"• {item}\n"
+        for meeting in meetings:
 
-        result += "\n-------------------------\n"
+            result += f"\n{meeting.title}\n"
 
-    return result
+            for item in meeting.action_items or []:
+                result += f"- {item}\n"
 
-
-ActionItemsTool = StructuredTool.from_function(
-    func=get_action_items,
-    name="get_action_items",
-    description=(
-        "Return all action items from previous meetings."
-    ),
-)
+        return result

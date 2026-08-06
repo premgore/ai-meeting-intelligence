@@ -1,48 +1,36 @@
-from langchain_core.tools import StructuredTool
-
-from app.services.email_service import EmailService
 from app.repositories.meeting_repository import MeetingRepository
+from app.services.email_service import EmailService
+from app.services.pdf_service import PDFService
+from app.tools.base_tool import MeetingBaseTool
 
 
-def send_meeting_report(
-    db,
-    meeting_id: int,
-    recipients: list[str],
-):
-    """
-    Send a meeting report by email.
-    """
+class EmailReportTool(MeetingBaseTool):
 
-    meeting = MeetingRepository.get_by_id(
-        db=db,
-        meeting_id=meeting_id,
-    )
+    name = "send_meeting_report"
 
-    if meeting is None:
-        return "Meeting not found."
+    description = "Generate and email a meeting report."
 
-    EmailService.send_meeting_report(
-        recipients=recipients,
-        subject=f"Meeting Report - {meeting.title}",
-        body=(
-            f"Hello,\n\n"
-            f"Please find the attached AI Meeting Report.\n\n"
-            f"Regards,\n"
-            f"AI Meeting Intelligence"
-        ),
-        attachment_path=f"reports/generated/meeting_{meeting.id}_report.pdf",
-    )
+    def _run(
+        self,
+        meeting_id: int,
+        email: str,
+    ) -> str:
 
-    return (
-        f"Meeting report sent successfully to "
-        f"{', '.join(recipients)}"
-    )
+        meeting = MeetingRepository.get_by_id(
+            db=self.context.db,
+            meeting_id=meeting_id,
+        )
 
+        if meeting is None:
+            return "Meeting not found."
 
-EmailReportTool = StructuredTool.from_function(
-    func=send_meeting_report,
-    name="send_meeting_report",
-    description=(
-        "Send a meeting report PDF to one or more email recipients."
-    ),
-)
+        pdf_path = PDFService.generate_report(meeting)
+
+        EmailService.send_meeting_report(
+            recipients=[email],
+            subject=f"Meeting Report - {meeting.title}",
+            body="Please find the attached meeting report.",
+            attachment_path=pdf_path,
+        )
+
+        return "Meeting report emailed successfully."

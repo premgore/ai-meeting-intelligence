@@ -1,68 +1,32 @@
-from langchain_core.tools import StructuredTool
-
-from sqlalchemy.orm import Session
-
 from app.repositories.meeting_repository import MeetingRepository
 from app.services.summary_service import SummaryService
+from app.tools.base_tool import MeetingBaseTool
 
 
-def summarize_meeting(
-    db: Session,
-    meeting_id: int,
-) -> str:
-    """
-    Generate an AI summary for a meeting.
-    """
+class SummaryTool(MeetingBaseTool):
 
-    meeting = MeetingRepository.get_by_id(
-        db=db,
-        meeting_id=meeting_id,
-    )
+    name = "summarize_meeting"
 
-    if meeting is None:
-        return "Meeting not found."
+    description = "Generate a meeting summary."
 
-    if not meeting.transcript:
-        return "Meeting transcript not found."
+    def _run(
+        self,
+        meeting_id: int,
+    ) -> str:
 
-    result = SummaryService.generate_summary(
-        meeting.transcript
-    )
+        meeting = MeetingRepository.get_by_id(
+            db=self.context.db,
+            meeting_id=meeting_id,
+        )
 
-    return f"""
-Summary
+        if meeting is None:
+            return "Meeting not found."
 
-{result.get("summary", "")}
+        if not meeting.transcript:
+            return "Meeting transcript not found."
 
---------------------------------
+        result = SummaryService.generate_summary(
+            meeting.transcript
+        )
 
-Action Items
-
-{result.get("action_items", [])}
-
---------------------------------
-
-Key Decisions
-
-{result.get("key_decisions", [])}
-
---------------------------------
-
-Risks
-
-{result.get("risks", [])}
-
---------------------------------
-
-Sentiment
-
-{result.get("sentiment", "")}
-"""
-
-SummaryTool = StructuredTool.from_function(
-    func=summarize_meeting,
-    name="summarize_meeting",
-    description=(
-        "Generate an AI summary for a meeting."
-    ),
-)
+        return result["summary"]

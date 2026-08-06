@@ -1,52 +1,34 @@
-from langchain_core.tools import StructuredTool
-
-from sqlalchemy.orm import Session
-
-from app.models.user import User
 from app.repositories.meeting_repository import MeetingRepository
+from app.tools.base_tool import MeetingBaseTool
 
 
-def get_meeting_history(
-    db: Session,
-    current_user: User,
-    limit: int = 10,
-) -> str:
-    """
-    Return the user's recent meetings.
-    """
+class MeetingHistoryTool(MeetingBaseTool):
 
-    meetings = MeetingRepository.get_recent_meetings(
-        db=db,
-        user_id=current_user.id,
-        limit=limit,
-    )
+    name = "meeting_history"
 
-    if not meetings:
-        return "No meetings found."
+    description = "Return recent meetings."
 
-    result = ""
+    def _run(
+        self,
+        limit: int = 10,
+    ) -> str:
 
-    for meeting in meetings:
+        meetings = MeetingRepository.get_recent_meetings(
+            self.context.db,
+            self.context.current_user.id,
+            limit,
+        )
 
-        result += f"""
-Meeting ID: {meeting.id}
+        if not meetings:
+            return "No meetings."
 
-Title:
-{meeting.title}
+        result = ""
 
-Summary:
-{meeting.summary or "No summary available"}
+        for meeting in meetings:
 
-----------------------------------------
-"""
+            result += (
+                f"{meeting.id} - "
+                f"{meeting.title}\n"
+            )
 
-    return result
-
-
-MeetingHistoryTool = StructuredTool.from_function(
-    func=get_meeting_history,
-    name="get_meeting_history",
-    description=(
-        "Return the user's recent meeting history."
-    ),
-)
+        return result

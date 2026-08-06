@@ -84,3 +84,9 @@ class Meeting(Base):
     )
 
     embedding = Column(Vector(384), nullable=True)
+
+    chat_messages = relationship(
+    "ChatMessage",
+    back_populates="meeting",
+    cascade="all, delete-orphan",
+)

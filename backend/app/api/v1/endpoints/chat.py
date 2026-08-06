@@ -21,9 +21,10 @@ def chat_with_meetings(
     current_user: User = Depends(get_current_user),
 ):
     answer = ChatService.ask_question(
-        db=db,
-        current_user=current_user,
-        question=request.question,
+    db=db,
+    current_user=current_user,
+    meeting_id=request.meeting_id,
+    question=request.question,
     )
 
     return ApiResponse(

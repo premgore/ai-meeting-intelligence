@@ -1,8 +1,9 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.groq_client import client
 from app.models.user import User
+from app.services.conversation_service import ConversationService
+from app.services.rag_service import RAGService
 from app.services.semantic_search_service import SemanticSearchService
 
 
@@ -12,10 +13,24 @@ class ChatService:
     def ask_question(
         db: Session,
         current_user: User,
+        meeting_id: int,
         question: str,
     ) -> str:
 
-        # Retrieve only the most relevant meetings using vector search
+        # Save user message
+        ConversationService.save_user_message(
+            db=db,
+            meeting_id=meeting_id,
+            message=question,
+        )
+
+        # Load conversation history
+        history = ConversationService.load_history(
+            db=db,
+            meeting_id=meeting_id,
+        )
+
+        # Retrieve relevant meetings
         meetings = SemanticSearchService.search(
             db=db,
             current_user=current_user,
@@ -29,62 +44,23 @@ class ChatService:
                 detail="No relevant meetings found.",
             )
 
-        context = ""
-
-        for meeting in meetings:
-            context += f"""
-Meeting ID: {meeting.id}
-Meeting Title: {meeting.title}
-
-Transcript:
-{meeting.transcript}
-
-Summary:
-{meeting.summary or "Not Available"}
-
-Action Items:
-{meeting.action_items or []}
-
-Key Decisions:
-{meeting.key_decisions or []}
-
-Risks:
-{meeting.risks or []}
-
-Sentiment:
-{meeting.sentiment or "Unknown"}
-
----------------------------------------
-"""
-
-        prompt = f"""
-You are an AI Meeting Assistant.
-
-Answer the user's question ONLY using the meeting information below.
-
-If the answer cannot be found in the provided meetings,
-reply exactly:
-
-"I couldn't find that information in your meetings."
-
-Meeting Context:
-
-{context}
-
-User Question:
-
-{question}
-"""
-
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-            temperature=0.2,
+        # Build RAG context
+        context = RAGService.build_context(
+            meetings
         )
 
-        return response.choices[0].message.content.strip()
+        # Generate AI response
+        answer = RAGService.generate_answer(
+            context=context,
+            history=history,
+            question=question,
+        )
+
+        # Save assistant response
+        ConversationService.save_ai_message(
+            db=db,
+            meeting_id=meeting_id,
+            message=answer,
+        )
+
+        return answer

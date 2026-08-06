@@ -156,3 +156,42 @@ class MeetingRepository:
         db.refresh(meeting)
 
         return meeting
+
+        @staticmethod
+    def get_all_with_action_items(
+        db: Session,
+        user_id: int,
+    ) -> list[Meeting]:
+        """
+        Return all meetings that contain action items.
+        """
+
+        return (
+            db.query(Meeting)
+            .filter(
+                Meeting.user_id == user_id,
+                Meeting.action_items.isnot(None),
+            )
+            .order_by(Meeting.id.desc())
+            .all()
+        )
+
+    @staticmethod
+def get_recent_meetings(
+    db: Session,
+    user_id: int,
+    limit: int = 10,
+) -> list[Meeting]:
+    """
+    Return the user's most recent meetings.
+    """
+
+    return (
+        db.query(Meeting)
+        .filter(
+            Meeting.user_id == user_id,
+        )
+        .order_by(Meeting.id.desc())
+        .limit(limit)
+        .all()
+    )

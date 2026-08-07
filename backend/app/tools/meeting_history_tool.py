@@ -4,19 +4,25 @@ from app.tools.base_tool import MeetingBaseTool
 
 class MeetingHistoryTool(MeetingBaseTool):
 
-    name = "meeting_history"
+    name: str = "meeting_history"
 
-    description = "Return recent meetings."
+    description: str = (
+        "Return the user's recent meetings."
+    )
 
     def _run(
         self,
         limit: int = 10,
     ) -> str:
 
-        meetings = MeetingRepository.get_recent_meetings(
-            self.context.db,
-            self.context.current_user.id,
-            limit,
+        context = self.require_context()
+
+        meetings = (
+            MeetingRepository.get_recent_meetings(
+                context.db,
+                context.current_user.id,
+                limit,
+            )
         )
 
         if not meetings:

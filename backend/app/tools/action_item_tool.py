@@ -4,16 +4,20 @@ from app.tools.base_tool import MeetingBaseTool
 
 class ActionItemsTool(MeetingBaseTool):
 
-    name = "get_action_items"
+    name: str = "get_action_items"
 
-    description = "Return action items."
+    description: str = (
+        "Return action items from previous meetings."
+    )
 
     def _run(self) -> str:
 
+        context = self.require_context()
+
         meetings = (
             MeetingRepository.get_all_with_action_items(
-                self.context.db,
-                self.context.current_user.id,
+                context.db,
+                context.current_user.id,
             )
         )
 

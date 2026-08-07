@@ -4,6 +4,7 @@ from app.models.meeting import Meeting
 
 
 class MeetingRepository:
+
     @staticmethod
     def create(
         db: Session,
@@ -103,12 +104,14 @@ class MeetingRepository:
         key_decisions: list,
         risks: list,
         sentiment: str,
+        embedding: list[float],
     ) -> Meeting:
         meeting.summary = summary
         meeting.action_items = action_items
         meeting.key_decisions = key_decisions
         meeting.risks = risks
         meeting.sentiment = sentiment
+        meeting.embedding = embedding
 
         db.commit()
         db.refresh(meeting)
@@ -134,30 +137,8 @@ class MeetingRepository:
             .order_by(Meeting.id.desc())
             .all()
         )
+
     @staticmethod
-    def update_ai_summary(
-        db: Session,
-        meeting: Meeting,
-        summary: str,
-        action_items: list,
-        key_decisions: list,
-        risks: list,
-        sentiment: str,
-        embedding: list[float],
-    ) -> Meeting:
-        meeting.summary = summary
-        meeting.action_items = action_items
-        meeting.key_decisions = key_decisions
-        meeting.risks = risks
-        meeting.sentiment = sentiment
-        meeting.embedding = embedding
-
-        db.commit()
-        db.refresh(meeting)
-
-        return meeting
-
-        @staticmethod
     def get_all_with_action_items(
         db: Session,
         user_id: int,
@@ -177,21 +158,21 @@ class MeetingRepository:
         )
 
     @staticmethod
-def get_recent_meetings(
-    db: Session,
-    user_id: int,
-    limit: int = 10,
-) -> list[Meeting]:
-    """
-    Return the user's most recent meetings.
-    """
+    def get_recent_meetings(
+        db: Session,
+        user_id: int,
+        limit: int = 10,
+    ) -> list[Meeting]:
+        """
+        Return the user's most recent meetings.
+        """
 
-    return (
-        db.query(Meeting)
-        .filter(
-            Meeting.user_id == user_id,
+        return (
+            db.query(Meeting)
+            .filter(
+                Meeting.user_id == user_id,
+            )
+            .order_by(Meeting.id.desc())
+            .limit(limit)
+            .all()
         )
-        .order_by(Meeting.id.desc())
-        .limit(limit)
-        .all()
-    )

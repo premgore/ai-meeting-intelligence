@@ -16,17 +16,19 @@ class MeetingAgent:
                 ("system", SYSTEM_PROMPT),
                 ("human", "{input}"),
                 MessagesPlaceholder(
-                    variable_name="agent_scratchpad"
+                    variable_name="agent_scratchpad",
                 ),
             ]
         )
 
+        agent = create_tool_calling_agent(
+            llm=llm,
+            tools=TOOLS,
+            prompt=prompt,
+        )
+
         self.executor = AgentExecutor(
-            agent=create_tool_calling_agent(
-                llm=llm,
-                tools=TOOLS,
-                prompt=prompt,
-            ),
+            agent=agent,
             tools=TOOLS,
             verbose=True,
         )
@@ -43,15 +45,18 @@ class MeetingAgent:
             current_user=current_user,
         )
 
-        # Inject context into every tool
-        for tool in TOOLS:
-
+        for tool in self.executor.tools:
             if hasattr(tool, "set_context"):
-
                 tool.set_context(context)
 
-        return self.executor.invoke(
-            {
-                "input": query,
+        try:
+            return self.executor.invoke(
+                {
+                    "input": query,
+                }
+            )
+
+        except Exception as e:
+            return {
+                "output": f"Agent failed: {str(e)}",
             }
-        )

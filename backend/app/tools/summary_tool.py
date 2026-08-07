@@ -5,17 +5,21 @@ from app.tools.base_tool import MeetingBaseTool
 
 class SummaryTool(MeetingBaseTool):
 
-    name = "summarize_meeting"
+    name: str = "summarize_meeting"
 
-    description = "Generate a meeting summary."
+    description: str = (
+        "Generate a summary for a meeting."
+    )
 
     def _run(
         self,
         meeting_id: int,
     ) -> str:
 
+        context = self.require_context()
+
         meeting = MeetingRepository.get_by_id(
-            db=self.context.db,
+            db=context.db,
             meeting_id=meeting_id,
         )
 

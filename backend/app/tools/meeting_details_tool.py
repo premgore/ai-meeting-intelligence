@@ -4,17 +4,21 @@ from app.tools.base_tool import MeetingBaseTool
 
 class MeetingDetailsTool(MeetingBaseTool):
 
-    name = "meeting_details"
+    name: str = "meeting_details"
 
-    description = "Return complete meeting details."
+    description: str = (
+        "Return full meeting details."
+    )
 
     def _run(
         self,
         meeting_id: int,
     ) -> str:
 
+        context = self.require_context()
+
         meeting = MeetingRepository.get_by_id(
-            self.context.db,
+            context.db,
             meeting_id,
         )
 

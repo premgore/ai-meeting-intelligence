@@ -16,7 +16,7 @@ class MeetingAgent:
             system_prompt=SYSTEM_PROMPT,
             context_schema=AgentContext,
             debug=True,
-            name="meeting_agent",
+            name="meeting-agent",
         )
 
     def invoke(
@@ -24,7 +24,7 @@ class MeetingAgent:
         db,
         current_user,
         query: str,
-    ):
+    ) -> str:
 
         context = AgentContext(
             db=db,
@@ -34,12 +34,15 @@ class MeetingAgent:
         result = self.agent.invoke(
             {
                 "messages": [
-                    HumanMessage(
-                        content=query,
-                    )
+                    HumanMessage(content=query)
                 ]
             },
             context=context,
         )
 
-        return result
+        messages = result.get("messages", [])
+
+        if not messages:
+            return "No response generated."
+
+        return messages[-1].content

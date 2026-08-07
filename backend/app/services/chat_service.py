@@ -1,10 +1,10 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.agent_v2.meeting_agent import MeetingAgent
 from app.models.user import User
+from app.repositories.meeting_repository import MeetingRepository
 from app.services.conversation_service import ConversationService
-from app.services.rag_service import RAGService
-from app.services.semantic_search_service import SemanticSearchService
 
 
 class ChatService:
@@ -17,6 +17,24 @@ class ChatService:
         question: str,
     ) -> str:
 
+        # Verify meeting exists
+        meeting = MeetingRepository.get_by_id(
+            db=db,
+            meeting_id=meeting_id,
+        )
+
+        if meeting is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Meeting not found.",
+            )
+
+        if meeting.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized.",
+            )
+
         # Save user message
         ConversationService.save_user_message(
             db=db,
@@ -24,39 +42,17 @@ class ChatService:
             message=question,
         )
 
-        # Load conversation history
-        history = ConversationService.load_history(
-            db=db,
-            meeting_id=meeting_id,
-        )
+        # Create agent
+        agent = MeetingAgent()
 
-        # Retrieve relevant meetings
-        meetings = SemanticSearchService.search(
+        # Ask agent
+        answer = agent.invoke(
             db=db,
             current_user=current_user,
             query=question,
-            limit=5,
         )
 
-        if not meetings:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No relevant meetings found.",
-            )
-
-        # Build RAG context
-        context = RAGService.build_context(
-            meetings
-        )
-
-        # Generate AI response
-        answer = RAGService.generate_answer(
-            context=context,
-            history=history,
-            question=question,
-        )
-
-        # Save assistant response
+        # Save AI response
         ConversationService.save_ai_message(
             db=db,
             meeting_id=meeting_id,

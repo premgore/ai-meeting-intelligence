@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.agent_v2.meeting_agent import MeetingAgent
+from app.agent.meeting_agent import MeetingAgent
 from app.models.user import User
 from app.repositories.meeting_repository import MeetingRepository
 from app.services.conversation_service import ConversationService

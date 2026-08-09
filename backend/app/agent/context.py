@@ -1,14 +1,15 @@
+from dataclasses import dataclass
+
 from sqlalchemy.orm import Session
 
 from app.models.user import User
 
 
+@dataclass(slots=True)
 class AgentContext:
+    """
+    Runtime context available to the AI agent during a request.
+    """
 
-    def __init__(
-        self,
-        db: Session,
-        current_user: User,
-    ):
-        self.db = db
-        self.current_user = current_user
+    db: Session
+    current_user: User

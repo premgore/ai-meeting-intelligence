@@ -1,7 +1,7 @@
 from langchain_core.messages import HumanMessage
 
-from app.agent_v2.context import AgentContext
-from app.agent_v2.meeting_agent import MeetingAgent
+from app.agent.context import AgentContext
+from app.agent.meeting_agent import MeetingAgent
 
 
 class StreamingService:

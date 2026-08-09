@@ -1,18 +1,17 @@
-from app.tools.action_item_tool import ActionItemsTool
-from app.tools.email_tool import EmailReportTool
-from app.tools.meeting_details_tool import MeetingDetailsTool
-from app.tools.meeting_history_tool import MeetingHistoryTool
-from app.tools.pdf_tool import GeneratePDFTool
-from app.tools.search_tool import SearchMeetingTool
-from app.tools.summary_tool import SummaryTool
-
+from app.agent.tools.action_items import get_action_items
+from app.agent.tools.details import get_meeting_details
+from app.agent.tools.email import email_meeting_report
+from app.agent.tools.history import get_recent_meetings
+from app.agent.tools.pdf import generate_pdf_report
+from app.agent.tools.search import search_meetings
+from app.agent.tools.summary import summarize_meeting
 
 TOOLS = [
-    SearchMeetingTool(),
-    GeneratePDFTool(),
-    EmailReportTool(),
-    SummaryTool(),
-    ActionItemsTool(),
-    MeetingDetailsTool(),
-    MeetingHistoryTool(),
+    search_meetings,
+    get_recent_meetings,
+    get_meeting_details,
+    summarize_meeting,
+    get_action_items,
+    generate_pdf_report,
+    email_meeting_report,
 ]

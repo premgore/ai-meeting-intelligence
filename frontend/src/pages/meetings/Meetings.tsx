@@ -36,14 +36,14 @@ export const Meetings: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 rounded-2xl bg-white border border-[#E8E1D8] shadow-xs">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            Meetings Workspace
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#211F1D]">
+            Meetings Repository
           </h1>
-          <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Manage corporate meeting recordings, transcriptions, and AI insights.
+          <p className="text-xs sm:text-sm text-[#6F6A65] mt-1">
+            Manage corporate meeting recordings, transcriptions, decisions, and action items.
           </p>
         </div>
 
@@ -54,28 +54,27 @@ export const Meetings: React.FC = () => {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 bg-white/80 dark:bg-slate-900/80 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 backdrop-blur-md">
+      <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-2xl border border-[#E8E1D8]">
         <div className="flex-1 w-full">
           <Input
-            placeholder="Search meetings by title or description..."
+            placeholder="Search meetings by title, topic, or description..."
             icon={<Search size={16} />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter size={16} className="text-slate-400 ml-2 hidden sm:inline-block" />
+          <Filter size={16} className="text-[#6F6A65] ml-2 hidden sm:inline-block" />
           <select
             value={sentimentFilter}
             onChange={(e) => setSentimentFilter(e.target.value)}
-            className="w-full sm:w-auto h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="w-full sm:w-auto h-9 px-3 rounded-xl border border-[#E8E1D8] bg-[#FAF8F4] text-xs font-bold text-[#211F1D] focus:outline-none focus:border-[#7A171C]"
           >
             <option value="all">All Sentiments</option>
-            <option value="positive">Positive</option>
-            <option value="neutral">Neutral</option>
-            <option value="negative">Negative</option>
+            <option value="positive">Positive Tone</option>
+            <option value="neutral">Neutral Discussion</option>
+            <option value="negative">Risks / Friction</option>
           </select>
         </div>
       </div>
@@ -88,15 +87,15 @@ export const Meetings: React.FC = () => {
           ))}
         </div>
       ) : filteredMeetings.length === 0 ? (
-        <div className="py-16 text-center space-y-4 rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40">
-          <div className="h-16 w-16 mx-auto rounded-2xl bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+        <div className="py-16 text-center space-y-4 rounded-2xl border border-dashed border-[#E8E1D8] bg-white">
+          <div className="h-16 w-16 mx-auto rounded-2xl bg-[#FAF4E8] text-[#7A171C] border border-[#C9953E]/30 flex items-center justify-center">
             <CalendarDays size={32} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-base font-bold text-[#211F1D]">
               No meetings found
             </h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+            <p className="text-xs text-[#6F6A65] max-w-sm mx-auto mt-1">
               {searchQuery
                 ? "No meetings match your current search or sentiment filter."
                 : "Get started by creating your first meeting or uploading an audio file."}

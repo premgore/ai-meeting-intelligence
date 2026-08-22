@@ -4,7 +4,7 @@ import { cn } from "../../lib/utils";
 
 export interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
   children?: React.ReactNode;
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger" | "glass";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger" | "gold" | "glass";
   size?: "sm" | "md" | "lg" | "icon";
   isLoading?: boolean;
 }
@@ -19,21 +19,23 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none";
+    "inline-flex items-center justify-center font-medium rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer";
 
   const variants = {
     primary:
-      "bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 focus:ring-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500",
+      "bg-[#7A171C] hover:bg-[#631216] text-white shadow-xs focus:ring-[#7A171C]",
     secondary:
-      "bg-purple-600 hover:bg-purple-700 text-white shadow-sm shadow-purple-500/20 focus:ring-purple-500 dark:bg-purple-600 dark:hover:bg-purple-500",
+      "bg-[#FAF4E8] hover:bg-[#F3E8D3] text-[#7A171C] border border-[#C9953E]/30 focus:ring-[#C9953E]",
+    gold:
+      "bg-[#C9953E] hover:bg-[#B28332] text-white shadow-xs focus:ring-[#C9953E]",
     outline:
-      "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 focus:ring-slate-400",
+      "border border-[#E8E1D8] bg-white hover:bg-[#FAF8F4] text-[#211F1D] focus:ring-[#7A171C]",
     ghost:
-      "bg-transparent hover:bg-slate-100 text-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 focus:ring-slate-400",
+      "bg-transparent hover:bg-[#F7EDED] text-[#6F6A65] hover:text-[#7A171C] focus:ring-[#7A171C]",
     danger:
-      "bg-red-500 hover:bg-red-600 text-white shadow-sm shadow-red-500/20 focus:ring-red-500",
+      "bg-rose-700 hover:bg-rose-800 text-white shadow-xs focus:ring-rose-700",
     glass:
-      "backdrop-blur-md bg-white/70 hover:bg-white/90 dark:bg-slate-900/70 dark:hover:bg-slate-900/90 text-slate-900 dark:text-slate-100 border border-white/20 dark:border-slate-800/80 shadow-md",
+      "bg-white/90 hover:bg-white text-[#211F1D] border border-[#E8E1D8] shadow-xs",
   };
 
   const sizes = {

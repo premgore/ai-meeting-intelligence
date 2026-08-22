@@ -23,7 +23,7 @@ export const Tabs: React.FC<TabsProps> = ({
   className,
 }) => {
   return (
-    <div className={cn("flex space-x-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 p-1 border border-slate-200/60 dark:border-slate-800", className)}>
+    <div className={cn("flex space-x-1 rounded-xl bg-[#FAF8F4] p-1 border border-[#E8E1D8]", className)}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
@@ -31,16 +31,16 @@ export const Tabs: React.FC<TabsProps> = ({
             key={tab.id}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "relative flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors focus:outline-none select-none",
+              "relative flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors focus:outline-none select-none cursor-pointer",
               isActive
-                ? "text-blue-600 dark:text-blue-400"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                ? "text-[#7A171C]"
+                : "text-[#6F6A65] hover:text-[#211F1D]"
             )}
           >
             {isActive && (
               <motion.div
                 layoutId="active-tab"
-                className="absolute inset-0 bg-white dark:bg-slate-900 rounded-lg shadow-sm"
+                className="absolute inset-0 bg-white rounded-lg shadow-xs border border-[#E8E1D8]"
                 transition={{ type: "spring", bounce: 0.15, duration: 0.3 }}
               />
             )}
@@ -52,8 +52,8 @@ export const Tabs: React.FC<TabsProps> = ({
                   className={cn(
                     "px-1.5 py-0.5 text-[10px] rounded-full font-bold",
                     isActive
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                      : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                      ? "bg-[#F7EDED] text-[#7A171C] border border-[#7A171C]/20"
+                      : "bg-[#E8E1D8] text-[#6F6A65]"
                   )}
                 >
                   {tab.badge}

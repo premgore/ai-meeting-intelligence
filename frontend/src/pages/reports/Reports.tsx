@@ -24,7 +24,7 @@ export const Reports: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `meeting_${meetingId}_report.pdf`;
+      a.download = `nirnaya_meeting_${meetingId}_report.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -51,57 +51,57 @@ export const Reports: React.FC = () => {
   return (
     <div className="space-y-6 pb-12 max-w-5xl mx-auto">
       {/* Header Banner */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-          Executive Reports & Exports
+      <div className="p-6 rounded-2xl bg-white border border-[#E8E1D8] shadow-xs">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#211F1D]">
+          Intelligence Reports & Exports
         </h1>
-        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-          Export automated PDF summaries or dispatch email reports directly to stakeholders.
+        <p className="text-xs sm:text-sm text-[#6F6A65] mt-1">
+          Export automated PDF summaries or dispatch email reports directly to executive stakeholders.
         </p>
       </div>
 
       {/* Reports Feed */}
       <div className="space-y-4">
         {isLoading ? (
-          <p className="text-xs text-slate-500 py-8 text-center">Loading reports...</p>
+          <p className="text-xs text-[#6F6A65] py-8 text-center">Loading reports...</p>
         ) : meetings.length === 0 ? (
-          <Card glass className="py-12 text-center space-y-3">
-            <FileText size={40} className="mx-auto text-slate-300 dark:text-slate-600" />
-            <p className="text-xs text-slate-500">No meeting reports generated yet.</p>
+          <Card className="py-12 text-center space-y-3 bg-white border-[#E8E1D8]">
+            <FileText size={38} className="mx-auto text-[#A39D97]" />
+            <p className="text-xs text-[#6F6A65]">No meeting reports generated yet.</p>
           </Card>
         ) : (
           meetings.map((m) => (
-            <Card key={m.id} glass className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <Card key={m.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border-[#E8E1D8]">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-purple-500/20">
+                <div className="h-12 w-12 rounded-2xl bg-[#7A171C] text-white flex items-center justify-center font-bold text-sm border border-[#C9953E]/30 shadow-xs">
                   #{m.id}
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{m.title}</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                  <h3 className="text-sm font-bold text-[#211F1D]">{m.title}</h3>
+                  <p className="text-xs text-[#6F6A65] line-clamp-1 mt-0.5">
                     {m.summary ? m.summary.slice(0, 90) + "..." : "No summary generated"}
                   </p>
-                  <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
-                    <span>{m.action_items?.length || 0} Tasks</span>
+                  <div className="flex items-center gap-3 mt-2 text-[11px] text-[#6F6A65]">
+                    <span className="font-semibold text-[#7A171C]">{m.action_items?.length || 0} Action Items</span>
                     <span>•</span>
-                    <span>{m.key_decisions?.length || 0} Decisions</span>
+                    <span className="font-semibold text-[#C9953E]">{m.key_decisions?.length || 0} Decisions</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="glass" size="sm" onClick={() => handleDownload(m.id)}>
-                  <Download size={14} /> PDF
+                <Button variant="outline" size="sm" onClick={() => handleDownload(m.id)}>
+                  <Download size={14} /> PDF Report
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="primary"
                   size="sm"
                   onClick={() => {
                     setSelectedMeetingId(m.id);
                     setShowEmailModal(true);
                   }}
                 >
-                  <Mail size={14} /> Email
+                  <Mail size={14} /> Email Report
                 </Button>
               </div>
             </Card>
@@ -113,24 +113,24 @@ export const Reports: React.FC = () => {
       <Modal
         isOpen={showEmailModal}
         onClose={() => setShowEmailModal(false)}
-        title="Email Meeting Summary Report"
+        title="Email NIRNAYA Intelligence Report"
         description="Dispatch automated executive PDF report to stakeholders."
       >
         <form onSubmit={handleSendEmail} className="space-y-4">
           <Input
             label="Recipient Emails (comma separated)"
-            placeholder="prem@example.com, manager@example.com"
+            placeholder="stakeholder@company.com, executive@company.com"
             icon={<Mail size={16} />}
             value={emailRecipients}
             onChange={(e) => setEmailRecipients(e.target.value)}
             required
           />
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-[#E8E1D8]">
             <Button type="button" variant="outline" onClick={() => setShowEmailModal(false)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary">
-              Send Report
+              Send Email Report
             </Button>
           </div>
         </form>

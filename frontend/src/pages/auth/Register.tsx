@@ -37,9 +37,8 @@ export const Register: React.FC = () => {
       await authService.registerUser(data.name, data.email, data.password);
       toast.success("Account created successfully! Signing in...");
       
-      // Auto login after registration
       const loginRes = await authService.loginUser(data.email, data.password);
-      login(loginRes.access_token);
+      await login(loginRes.access_token);
       navigate("/dashboard");
     } catch (err: any) {
       toast.error(err.response?.data?.detail || "Registration failed. Email may already exist.");
@@ -49,59 +48,64 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl backdrop-blur-xl space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-xl font-bold text-white">Create Enterprise Account</h2>
-        <p className="text-xs text-slate-400">
-          Get started with AI-driven meeting intelligence.
-        </p>
-      </div>
+    <div className="w-full">
+      <div className="bg-white border border-[#E8E1D8] rounded-2xl shadow-xl p-8 space-y-6">
+        <div className="text-center space-y-1.5">
+          <h2 className="text-xl font-bold text-[#211F1D]">Create Enterprise Account</h2>
+          <p className="text-xs text-[#6F6A65]">
+            Get started with NIRNAYA decision intelligence platform.
+          </p>
+        </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Input
-          label="Full Name"
-          type="text"
-          placeholder="Prem Gore"
-          icon={<UserIcon size={16} />}
-          error={errors.name?.message}
-          {...register("name")}
-        />
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Input
+            label="Full Name"
+            type="text"
+            placeholder="Prem Gore"
+            icon={<UserIcon size={16} />}
+            error={errors.name?.message}
+            {...register("name")}
+          />
 
-        <Input
-          label="Email Address"
-          type="email"
-          placeholder="name@company.com"
-          icon={<Mail size={16} />}
-          error={errors.email?.message}
-          {...register("email")}
-        />
+          <Input
+            label="Corporate Email"
+            type="email"
+            placeholder="name@company.com"
+            icon={<Mail size={16} />}
+            error={errors.email?.message}
+            {...register("email")}
+          />
 
-        <Input
-          label="Password"
-          type="password"
-          placeholder="••••••••"
-          icon={<Lock size={16} />}
-          error={errors.password?.message}
-          {...register("password")}
-        />
+          <Input
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            icon={<Lock size={16} />}
+            error={errors.password?.message}
+            {...register("password")}
+          />
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="lg"
-          className="w-full mt-2"
-          isLoading={loading}
-        >
-          Create Account
-          <ArrowRight size={16} />
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className="w-full mt-2"
+            isLoading={loading}
+          >
+            Create NIRNAYA Account
+            <ArrowRight size={16} />
+          </Button>
+        </form>
 
-      <div className="pt-2 border-t border-slate-800 text-center text-xs text-slate-400">
-        Already have an account?{" "}
-        <Link to="/login" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
-          Sign In
-        </Link>
+        <div className="pt-4 border-t border-[#E8E1D8] text-center text-xs text-[#6F6A65]">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="font-bold text-[#7A171C] hover:text-[#C9953E] transition-colors"
+          >
+            Sign In
+          </Link>
+        </div>
       </div>
     </div>
   );

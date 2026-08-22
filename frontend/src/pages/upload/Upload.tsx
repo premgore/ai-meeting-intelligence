@@ -83,13 +83,13 @@ export const Upload: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-12">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-white border border-[#E8E1D8] shadow-xs">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            Audio Upload Workspace
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#211F1D]">
+            Audio Intelligence Ingestion
           </h1>
-          <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Upload meeting audio recordings (.mp3, .wav, .m4a) for AI transcription & analysis.
+          <p className="text-xs sm:text-sm text-[#6F6A65] mt-1">
+            Upload meeting audio recordings (.mp3, .wav, .m4a) for NIRNAYA AI transcription & analysis.
           </p>
         </div>
 
@@ -99,20 +99,20 @@ export const Upload: React.FC = () => {
       </div>
 
       {/* Target Meeting Selector */}
-      <Card glass className="p-5">
-        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+      <Card className="p-5 bg-white border-[#E8E1D8]">
+        <label className="block text-xs font-bold uppercase tracking-wider text-[#6F6A65] mb-2">
           Select Destination Meeting
         </label>
         <div className="flex items-center gap-3">
           <select
             value={selectedMeetingId || ""}
             onChange={(e) => setSelectedMeetingId(Number(e.target.value))}
-            className="flex-1 h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="flex-1 h-10 px-3.5 rounded-xl border border-[#E8E1D8] bg-[#FAF8F4] text-xs font-bold text-[#211F1D] focus:outline-none focus:border-[#7A171C]"
           >
-            <option value="">-- Choose a meeting --</option>
+            <option value="">-- Choose a meeting space --</option>
             {meetings.map((m) => (
               <option key={m.id} value={m.id}>
-                Meeting #{m.id} - {m.title}
+                Meeting #{m.id} — {m.title}
               </option>
             ))}
           </select>
@@ -120,11 +120,11 @@ export const Upload: React.FC = () => {
       </Card>
 
       {/* Drag & Drop File Upload Area */}
-      <Card glass className="p-8">
+      <Card className="p-8 bg-white border-[#E8E1D8]">
         <div
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleFileDrop}
-          className="border-2 border-dashed border-slate-300 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 rounded-2xl p-8 sm:p-12 text-center transition-all bg-slate-50/50 dark:bg-slate-900/50 space-y-4 cursor-pointer relative"
+          className="border-2 border-dashed border-[#E8E1D8] hover:border-[#7A171C] rounded-2xl p-8 sm:p-12 text-center transition-all bg-[#FAF8F4] space-y-4 cursor-pointer relative"
         >
           <input
             type="file"
@@ -133,15 +133,15 @@ export const Upload: React.FC = () => {
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
 
-          <div className="h-16 w-16 mx-auto rounded-2xl bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-sm">
+          <div className="h-16 w-16 mx-auto rounded-2xl bg-[#FAF4E8] text-[#7A171C] border border-[#C9953E]/30 flex items-center justify-center shadow-xs">
             <UploadCloud size={32} />
           </div>
 
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-base font-bold text-[#211F1D]">
               Drag & Drop your audio file here
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-[#6F6A65] mt-1">
               Supports MP3, WAV, M4A, WEBM files up to 100MB.
             </p>
           </div>
@@ -153,30 +153,30 @@ export const Upload: React.FC = () => {
 
         {/* Selected File Card */}
         {selectedFile && (
-          <div className="mt-6 p-4 rounded-xl bg-blue-50/50 dark:bg-slate-800/60 border border-blue-200/60 dark:border-slate-700 flex items-center justify-between">
+          <div className="mt-6 p-4 rounded-xl bg-[#FAF4E8] border border-[#C9953E]/40 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-blue-600 text-white">
+              <div className="p-2.5 rounded-xl bg-[#7A171C] text-white">
                 <FileAudio size={20} />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{selectedFile.name}</p>
-                <p className="text-[11px] text-slate-500">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                <p className="text-xs font-bold text-[#211F1D]">{selectedFile.name}</p>
+                <p className="text-[11px] text-[#6F6A65]">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
               </div>
             </div>
-            <Badge variant="success">Ready</Badge>
+            <Badge variant="gold">File Attached</Badge>
           </div>
         )}
 
         {/* Upload Progress Bar */}
         {isUploading && (
           <div className="mt-6 space-y-2">
-            <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <span>Uploading & Transcribing...</span>
+            <div className="flex justify-between text-xs font-semibold text-[#211F1D]">
+              <span>Ingesting & Processing Audio...</span>
               <span>{uploadProgress}%</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-[#E8E1D8] overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-300"
+                className="h-full bg-[#7A171C] rounded-full transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>

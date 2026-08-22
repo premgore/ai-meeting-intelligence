@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "../../lib/utils";
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: "default" | "success" | "warning" | "danger" | "info" | "outline";
+  variant?: "default" | "burgundy" | "gold" | "success" | "warning" | "danger" | "info" | "outline" | "low" | "medium" | "high";
   dot?: boolean;
 }
 
@@ -14,21 +14,31 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const variants = {
-    default: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700",
-    success: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
-    warning: "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border-amber-200 dark:border-amber-800",
-    danger: "bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border-rose-200 dark:border-rose-800",
-    info: "bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 border-sky-200 dark:border-sky-800",
-    outline: "bg-transparent text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700",
+    default: "bg-[#F7EDED] text-[#7A171C] border-[#E8E1D8]",
+    burgundy: "bg-[#7A171C] text-white border-[#7A171C]",
+    gold: "bg-[#FAF4E8] text-[#9A6F27] border-[#C9953E]/30",
+    success: "bg-[#F0FDF4] text-[#15803D] border-[#BBF7D0]",
+    warning: "bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]",
+    danger: "bg-[#FDF2F2] text-[#991B1B] border-[#FECACA]",
+    info: "bg-[#FAF4E8] text-[#7A171C] border-[#E8E1D8]",
+    outline: "bg-transparent text-[#6F6A65] border-[#E8E1D8]",
+    low: "bg-[#F7EDED] text-[#7A171C] border-[#E8E1D8]",
+    medium: "bg-[#FAF4E8] text-[#9A6F27] border-[#C9953E]/30",
+    high: "bg-[#FDF2F2] text-[#991B1B] border-[#FECACA]",
   };
 
   const dotColors = {
-    default: "bg-slate-500",
+    default: "bg-[#7A171C]",
+    burgundy: "bg-[#C9953E]",
+    gold: "bg-[#C9953E]",
     success: "bg-emerald-500",
     warning: "bg-amber-500",
     danger: "bg-rose-500",
-    info: "bg-sky-500",
-    outline: "bg-slate-400",
+    info: "bg-[#7A171C]",
+    outline: "bg-[#C9953E]",
+    low: "bg-[#7A171C]",
+    medium: "bg-[#C9953E]",
+    high: "bg-rose-600",
   };
 
   return (

@@ -25,7 +25,7 @@ export const StatCard: React.FC<StatCardProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <Card glass className="p-5">
+      <Card className="p-5">
         <div className="flex items-center justify-between">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-10 w-10 rounded-xl" />
@@ -37,39 +37,44 @@ export const StatCard: React.FC<StatCardProps> = ({
   }
 
   return (
-    <Card glass hoverable className="p-5 relative overflow-hidden group">
+    <Card hoverable className="p-5 relative overflow-hidden group border-[#E8E1D8] bg-white">
+      {/* Top subtle gold accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#7A171C] via-[#C9953E] to-[#7A171C] opacity-0 group-hover:opacity-100 transition-opacity" />
+
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#6F6A65]">
           {title}
         </span>
-        <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800/80 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-slate-700/50 group-hover:scale-110 transition-transform">
+        <div className="p-2.5 rounded-xl bg-[#F7EDED] text-[#7A171C] border border-[#E8E1D8] group-hover:border-[#C9953E]/40 group-hover:scale-105 transition-all">
           {icon}
         </div>
       </div>
+
       <div className="mt-3 flex items-baseline gap-2">
-        <h3 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h3 className="text-3xl font-bold text-[#211F1D] tracking-tight">
           {value}
         </h3>
         {trend && (
           <span
             className={cn(
-              "inline-flex items-center text-xs font-bold px-1.5 py-0.5 rounded-md",
+              "inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-md border",
               isPositive
-                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
-                : "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400"
+                ? "bg-[#FAF4E8] text-[#9A6F27] border-[#C9953E]/30"
+                : "bg-rose-50 text-rose-800 border-rose-200"
             )}
           >
             {isPositive ? (
-              <ArrowUpRight size={14} className="mr-0.5" />
+              <ArrowUpRight size={14} className="mr-0.5 text-[#C9953E]" />
             ) : (
-              <ArrowDownRight size={14} className="mr-0.5" />
+              <ArrowDownRight size={14} className="mr-0.5 text-rose-600" />
             )}
             {trend}
           </span>
         )}
       </div>
+
       {subtitle && (
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-xs text-[#6F6A65]">
           {subtitle}
         </p>
       )}

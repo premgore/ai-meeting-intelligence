@@ -1,8 +1,8 @@
 from typing import Annotated
 
-# pyrefly: ignore [missing-import]
-from langchain.tools import tool
+from langchain.tools import tool, ToolRuntime
 
+from app.agent.context import AgentContext, extract_context
 from app.agent.dependencies import ToolDependencies
 from app.core.logger import logger
 from app.repositories.meeting_repository import MeetingRepository
@@ -19,49 +19,91 @@ def summarize_meeting(
         bool,
         "Set to True ONLY if the user explicitly requested to regenerate the summary.",
     ] = False,
-    deps: ToolDependencies = None,
+    runtime: ToolRuntime[AgentContext] | None = None,
+    deps: ToolDependencies | None = None,
 ) -> str:
     """
-    Return the summary of a meeting. Returns stored summary if present unless force_regenerate is True.
+    Return the summary of a meeting. Returns stored summary if present
+    unless force_regenerate is True.
     """
     logger.info(
-        f"Executing summarize_meeting tool for meeting_id={meeting_id}, force_regenerate={force_regenerate}"
+        f"Executing summarize_meeting tool "
+        f"for meeting_id={meeting_id}, "
+        f"force_regenerate={force_regenerate}"
     )
 
     try:
+        ctx = extract_context(runtime, deps)
+        if not ctx:
+            return "Error: Runtime context or dependencies missing."
+
+        db = ctx.db
+        current_user = ctx.current_user
+
         meeting = MeetingRepository.get_by_id(
-            db=deps.db,
+            db=db,
             meeting_id=meeting_id,
         )
 
         if meeting is None:
-            logger.warning(f"Meeting with ID={meeting_id} not found.")
-            return f"Meeting with ID {meeting_id} not found."
-
-        if meeting.user_id != deps.current_user.id:
             logger.warning(
-                f"User {deps.current_user.id} unauthorized for meeting ID={meeting_id}"
+                f"Meeting with ID={meeting_id} not found."
             )
-            return f"Access denied for meeting ID {meeting_id}."
+            return (
+                f"Meeting with ID {meeting_id} not found."
+            )
 
-        # Return existing summary if available and not forced to regenerate
+        if meeting.user_id != current_user.id:
+            logger.warning(
+                f"User {current_user.id} unauthorized "
+                f"for meeting ID={meeting_id}"
+            )
+            return (
+                f"Access denied for meeting ID {meeting_id}."
+            )
+
         if meeting.summary and not force_regenerate:
-            logger.info(f"Returning stored summary for meeting ID={meeting_id}")
-            return f"Summary for Meeting ID {meeting.id} ('{meeting.title}'):\n\n{meeting.summary}"
+            logger.info(
+                f"Returning stored summary "
+                f"for meeting ID={meeting_id}"
+            )
 
-        # If summary missing or force_regenerate is requested
+            return (
+                f"Summary for Meeting ID {meeting.id} "
+                f"('{meeting.title}'):\n\n"
+                f"{meeting.summary}"
+            )
+
         if not meeting.transcript:
-            return f"Cannot generate summary: Meeting ID {meeting_id} has no transcript. Please transcribe the meeting first."
+            return (
+                f"Cannot generate summary: Meeting ID "
+                f"{meeting_id} has no transcript. "
+                f"Please transcribe the meeting first."
+            )
 
-        logger.info(f"Generating new summary for meeting ID={meeting_id}")
-        updated_meeting = MeetingService.summarize_meeting(
-            db=deps.db,
-            meeting_id=meeting_id,
-            current_user=deps.current_user,
+        logger.info(
+            f"Generating new summary "
+            f"for meeting ID={meeting_id}"
         )
 
-        return f"Generated Summary for Meeting ID {updated_meeting.id} ('{updated_meeting.title}'):\n\n{updated_meeting.summary}"
+        updated_meeting = MeetingService.summarize_meeting(
+            db=db,
+            meeting_id=meeting_id,
+            current_user=current_user,
+        )
+
+        return (
+            f"Generated Summary for Meeting ID "
+            f"{updated_meeting.id} "
+            f"('{updated_meeting.title}'):\n\n"
+            f"{updated_meeting.summary}"
+        )
 
     except Exception as e:
-        logger.exception(f"Error in summarize_meeting tool: {str(e)}")
-        return f"Error generating or retrieving meeting summary: {str(e)}"
+        logger.exception(
+            f"Error in summarize_meeting tool: {str(e)}"
+        )
+        return (
+            f"Error generating or retrieving meeting summary: "
+            f"{str(e)}"
+        )

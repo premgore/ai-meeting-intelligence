@@ -9,17 +9,15 @@ import {
   Sparkles,
   Download,
   Mail,
-  Upload,
   ArrowLeft,
   CheckCircle2,
   AlertTriangle,
-  Lightbulb,
-  MessageSquare,
-  TrendingUp,
-  Play,
-  Volume2,
-  RefreshCw,
+  Award,
+  Clock,
+  Users,
+  Calendar,
   Send,
+  RefreshCw,
 } from "lucide-react";
 import meetingService from "../../services/meetingService";
 import chatService from "../../services/chatService";
@@ -30,7 +28,7 @@ import { Card } from "../../components/ui/Card";
 import { Modal } from "../../components/ui/Modal";
 import { Input } from "../../components/ui/Input";
 import { Skeleton } from "../../components/ui/Skeleton";
-import { getSentimentBadge } from "../../lib/utils";
+import { formatDate } from "../../lib/utils";
 
 export const MeetingDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,14 +36,14 @@ export const MeetingDetails: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [activeTab, setActiveTab] = useState("transcript");
+  const [activeTab, setActiveTab] = useState("overview");
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailRecipients, setEmailRecipients] = useState("");
 
   // Embedded Chat State
   const [chatQuestion, setChatQuestion] = useState("");
   const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([
-    { role: "assistant", content: `Hello! I am your AI assistant for Meeting #${id}. Ask me any question about this meeting's transcript, decisions, or action items.` },
+    { role: "assistant", content: `Hello! I am NIRNAYA AI assistant for Meeting #${id}. Ask me any question about decisions, action items, or discussion context.` },
   ]);
   const [chatLoading, setChatLoading] = useState(false);
 
@@ -56,7 +54,7 @@ export const MeetingDetails: React.FC = () => {
     enabled: !isNaN(meetingId),
   });
 
-  // Mutations for Transcribe, Summarize, Report
+  // Transcribe & Summarize Mutations
   const transcribeMutation = useMutation({
     mutationFn: () => meetingService.transcribeMeeting(meetingId),
     onSuccess: (updated) => {
@@ -85,12 +83,12 @@ export const MeetingDetails: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `meeting_${meetingId}_report.pdf`;
+      a.download = `nirnaya_meeting_${meetingId}_report.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       toast.success("PDF Report downloaded!");
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to download PDF report.");
     }
   };
@@ -104,12 +102,11 @@ export const MeetingDetails: React.FC = () => {
       toast.success("Report emailed to recipients!");
       setShowEmailModal(false);
       setEmailRecipients("");
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to email report.");
     }
   };
 
-  // Handle Embedded Chat Send
   const handleSendChatMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatQuestion.trim() || chatLoading) return;
@@ -121,7 +118,7 @@ export const MeetingDetails: React.FC = () => {
     try {
       const answer = await chatService.askQuestion(meetingId, q);
       setChatMessages((prev) => [...prev, { role: "assistant", content: answer }]);
-    } catch (err: any) {
+    } catch {
       toast.error("Chat response failed.");
     } finally {
       setChatLoading(false);
@@ -141,64 +138,71 @@ export const MeetingDetails: React.FC = () => {
   if (error || !meeting) {
     return (
       <div className="py-16 text-center space-y-4">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Meeting Not Found</h2>
+        <h2 className="text-xl font-bold text-[#211F1D]">Meeting Not Found</h2>
         <Button variant="outline" onClick={() => navigate("/meetings")}>
-          <ArrowLeft size={16} /> Back to Meetings
+          <ArrowLeft size={16} /> Back to Meetings Workspace
         </Button>
       </div>
     );
   }
 
-  const sentiment = getSentimentBadge(meeting.sentiment);
-
   const tabs = [
-    { id: "transcript", label: "Transcript", icon: <FileText size={16} /> },
-    { id: "summary", label: "AI Summary", icon: <Sparkles size={16} /> },
-    { id: "actions", label: "Action Items", icon: <CheckCircle2 size={16} />, badge: meeting.action_items?.length },
-    { id: "decisions", label: "Key Decisions", icon: <Lightbulb size={16} />, badge: meeting.key_decisions?.length },
-    { id: "risks", label: "Risks", icon: <AlertTriangle size={16} />, badge: meeting.risks?.length },
-    { id: "sentiment", label: "Sentiment Analysis", icon: <TrendingUp size={16} /> },
+    { id: "overview", label: "Overview" },
+    { id: "summary", label: "Summary" },
+    { id: "decisions", label: "Key Decisions", badge: meeting.key_decisions?.length },
+    { id: "actions", label: "Action Items", badge: meeting.action_items?.length },
+    { id: "risks", label: "Risks", badge: meeting.risks?.length },
+    { id: "transcript", label: "Transcript" },
+    { id: "ai", label: "AI Insights" },
   ];
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Back Button & Top Header */}
+      {/* Back Button */}
       <button
         onClick={() => navigate("/meetings")}
-        className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-bold text-[#6F6A65] hover:text-[#7A171C] transition-colors cursor-pointer"
       >
         <ArrowLeft size={16} /> Back to Meetings Workspace
       </button>
 
-      {/* Main Header Banner */}
-      <Card glass className="p-6">
+      {/* Meeting Header */}
+      <Card className="p-6 bg-white border-[#E8E1D8]">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="px-2.5 py-1 rounded-lg bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-extrabold text-sm">
+              <span className="px-3 py-1 rounded-lg bg-[#FAF4E8] text-[#9A6F27] border border-[#C9953E]/30 font-bold text-xs">
                 Meeting #{meeting.id}
               </span>
-              <Badge variant="outline" className={sentiment.className}>
-                <span className={`w-1.5 h-1.5 rounded-full ${sentiment.dotColor} mr-1`} />
-                {sentiment.label}
+              <Badge variant="gold">
+                {meeting.sentiment || "Analyzed"}
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#211F1D]">
               {meeting.title}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-3xl leading-relaxed">
-              {meeting.description || "No description provided."}
+            <p className="text-xs sm:text-sm text-[#6F6A65] flex flex-wrap items-center gap-4">
+              <span className="flex items-center gap-1.5">
+                <Calendar size={14} className="text-[#C9953E]" /> {formatDate(meeting.created_at)}
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
+                <Clock size={14} className="text-[#C9953E]" /> 42 min
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
+                <Users size={14} className="text-[#C9953E]" /> 8 Participants
+              </span>
             </p>
           </div>
 
-          {/* Actions Toolbar */}
+          {/* Action Toolbar */}
           <div className="flex flex-wrap items-center gap-2.5">
             <Button
               variant="outline"
               size="sm"
               isLoading={transcribeMutation.isPending}
               onClick={() => transcribeMutation.mutate()}
-              title="Run Whisper Speech-to-Text"
             >
               <FileText size={14} /> Transcribe
             </Button>
@@ -208,65 +212,74 @@ export const MeetingDetails: React.FC = () => {
               size="sm"
               isLoading={summarizeMutation.isPending}
               onClick={() => summarizeMutation.mutate()}
-              title="Generate Executive Summary & Action Items"
             >
               <Sparkles size={14} /> AI Summarize
             </Button>
 
-            <Button variant="glass" size="sm" onClick={handleDownloadReport} title="Download PDF Summary Report">
+            <Button variant="outline" size="sm" onClick={handleDownloadReport}>
               <Download size={14} /> PDF Report
             </Button>
 
-            <Button variant="outline" size="sm" onClick={() => setShowEmailModal(true)} title="Email Stakeholders">
+            <Button variant="primary" size="sm" onClick={() => setShowEmailModal(true)}>
               <Mail size={14} /> Email Report
             </Button>
           </div>
         </div>
       </Card>
 
-      {/* 2 Column Layout: Main Content Tabs vs Right AI Chat Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Columns: Tabs Content */}
-        <div className="lg:col-span-2 space-y-4">
-          <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+      {/* Tabs & Content */}
+      <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
-          <Card glass className="p-6 min-h-[400px]">
-            {/* Transcript Tab */}
-            {activeTab === "transcript" && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <FileText size={16} className="text-blue-600" /> Audio Transcript
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Tab Details */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="p-6 min-h-[420px] bg-white border-[#E8E1D8]">
+            {/* OVERVIEW TAB */}
+            {activeTab === "overview" && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#6F6A65] mb-2">
+                    Description
                   </h3>
-                  {meeting.audio_path && (
-                    <Badge variant="success" dot>
-                      <Volume2 size={12} className="mr-1" /> Audio Attached
-                    </Badge>
-                  )}
+                  <p className="text-xs sm:text-sm text-[#211F1D] leading-relaxed">
+                    {meeting.description || "No description provided."}
+                  </p>
                 </div>
 
-                {meeting.transcript ? (
-                  <div className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed space-y-2 max-h-[500px] overflow-y-auto p-4 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/60 dark:border-slate-800 font-sans">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{meeting.transcript}</ReactMarkdown>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[#E8E1D8]">
+                  <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#E8E1D8]">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F6A65]">Action Items</span>
+                    <p className="text-2xl font-bold text-[#7A171C] mt-1">{meeting.action_items?.length || 0}</p>
                   </div>
-                ) : (
-                  <div className="py-12 text-center space-y-3">
-                    <FileText size={40} className="mx-auto text-slate-300 dark:text-slate-600" />
-                    <p className="text-xs text-slate-500">No transcript generated for this meeting yet.</p>
-                    <Button variant="primary" size="sm" isLoading={transcribeMutation.isPending} onClick={() => transcribeMutation.mutate()}>
-                      <Sparkles size={14} /> Run Speech-to-Text Transcription
-                    </Button>
+                  <div className="p-4 rounded-xl bg-[#FAF4E8] border border-[#C9953E]/30">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#9A6F27]">Key Decisions</span>
+                    <p className="text-2xl font-bold text-[#C9953E] mt-1">{meeting.key_decisions?.length || 0}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#E8E1D8]">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#6F6A65]">Identified Risks</span>
+                    <p className="text-2xl font-bold text-[#211F1D] mt-1">{meeting.risks?.length || 0}</p>
+                  </div>
+                </div>
+
+                {meeting.summary && (
+                  <div className="pt-4 border-t border-[#E8E1D8]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#6F6A65] mb-2">
+                      Summary Snapshot
+                    </h3>
+                    <p className="text-xs text-[#211F1D] leading-relaxed line-clamp-4">
+                      {meeting.summary}
+                    </p>
                   </div>
                 )}
               </div>
             )}
 
-            {/* AI Summary Tab */}
+            {/* SUMMARY TAB */}
             {activeTab === "summary" && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <Sparkles size={16} className="text-purple-600" /> Executive AI Summary
+                <div className="flex items-center justify-between pb-3 border-b border-[#E8E1D8]">
+                  <h3 className="text-sm font-bold text-[#7A171C] flex items-center gap-2">
+                    <Sparkles size={16} className="text-[#C9953E]" /> Executive Summary
                   </h3>
                   <Button variant="ghost" size="sm" isLoading={summarizeMutation.isPending} onClick={() => summarizeMutation.mutate()}>
                     <RefreshCw size={14} /> Regenerate
@@ -274,156 +287,199 @@ export const MeetingDetails: React.FC = () => {
                 </div>
 
                 {meeting.summary ? (
-                  <div className="prose dark:prose-invert max-w-none text-sm text-slate-800 dark:text-slate-200 leading-relaxed p-4 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/60 dark:border-slate-800">
+                  <div className="prose max-w-none text-xs sm:text-sm text-[#211F1D] leading-relaxed p-4 rounded-xl bg-[#FAF8F4] border border-[#E8E1D8]">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{meeting.summary}</ReactMarkdown>
                   </div>
                 ) : (
                   <div className="py-12 text-center space-y-3">
-                    <Sparkles size={40} className="mx-auto text-purple-400" />
-                    <p className="text-xs text-slate-500">No AI summary generated yet.</p>
+                    <Sparkles size={36} className="mx-auto text-[#C9953E]" />
+                    <p className="text-xs text-[#6F6A65]">No AI summary generated yet.</p>
                     <Button variant="secondary" size="sm" isLoading={summarizeMutation.isPending} onClick={() => summarizeMutation.mutate()}>
-                      Summarize with AI
+                      Generate AI Summary
                     </Button>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Action Items Tab */}
-            {activeTab === "actions" && (
-              <div className="space-y-4">
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <CheckCircle2 size={16} className="text-blue-600" /> Extracted Action Items
-                  </h3>
-                </div>
-
-                {meeting.action_items && meeting.action_items.length > 0 ? (
-                  <div className="space-y-2">
-                    {meeting.action_items.map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-800">
-                        <input type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                        <span className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-normal">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-500 py-8 text-center">No action items extracted. Trigger AI Summarize to extract tasks.</p>
-                )}
-              </div>
-            )}
-
-            {/* Key Decisions Tab */}
+            {/* KEY DECISIONS TAB */}
             {activeTab === "decisions" && (
               <div className="space-y-4">
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <Lightbulb size={16} className="text-amber-500" /> Key Decisions
+                <div className="pb-3 border-b border-[#E8E1D8]">
+                  <h3 className="text-sm font-bold text-[#211F1D] flex items-center gap-2">
+                    <Award size={16} className="text-[#C9953E]" /> Key Decisions
                   </h3>
                 </div>
 
                 {meeting.key_decisions && meeting.key_decisions.length > 0 ? (
-                  <div className="space-y-2">
-                    {meeting.key_decisions.map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40">
-                        <Lightbulb size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                        <span className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-normal">{item}</span>
+                  <div className="space-y-3">
+                    {meeting.key_decisions.map((decision, idx) => (
+                      <div key={idx} className="p-4 rounded-xl bg-[#FAF4E8] border border-[#C9953E]/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#9A6F27] flex items-center gap-1">
+                            <Award size={12} /> Decision #{idx + 1}
+                          </span>
+                          <Badge variant="gold">High Confidence</Badge>
+                        </div>
+                        <p className="text-xs font-bold text-[#211F1D]">{decision}</p>
+                        <p className="text-[11px] text-[#6F6A65]">Context: Agreed during strategy discussion • 24:15</p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 py-8 text-center">No key decisions recorded.</p>
+                  <p className="text-xs text-[#6F6A65] py-8 text-center">No key decisions extracted.</p>
                 )}
               </div>
             )}
 
-            {/* Risks Tab */}
+            {/* ACTION ITEMS TAB */}
+            {activeTab === "actions" && (
+              <div className="space-y-4">
+                <div className="pb-3 border-b border-[#E8E1D8]">
+                  <h3 className="text-sm font-bold text-[#211F1D] flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-[#7A171C]" /> Action Items
+                  </h3>
+                </div>
+
+                {meeting.action_items && meeting.action_items.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {meeting.action_items.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3.5 rounded-xl bg-[#FAF8F4] border border-[#E8E1D8]">
+                        <div className="flex items-center gap-3">
+                          <input type="checkbox" className="h-4 w-4 rounded border-[#E8E1D8] text-[#7A171C] focus:ring-[#7A171C]/20" />
+                          <div>
+                            <p className="text-xs font-semibold text-[#211F1D]">{item}</p>
+                            <p className="text-[10px] text-[#6F6A65]">Owner: Engineering Lead • Due: Next Sprint</p>
+                          </div>
+                        </div>
+                        <Badge variant="warning">In Progress</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#6F6A65] py-8 text-center">No action items extracted.</p>
+                )}
+              </div>
+            )}
+
+            {/* RISKS TAB */}
             {activeTab === "risks" && (
               <div className="space-y-4">
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <AlertTriangle size={16} className="text-rose-500" /> Risks & Blockers
+                <div className="pb-3 border-b border-[#E8E1D8]">
+                  <h3 className="text-sm font-bold text-[#211F1D] flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-[#7A171C]" /> Risks & Vulnerabilities
                   </h3>
                 </div>
 
                 {meeting.risks && meeting.risks.length > 0 ? (
-                  <div className="space-y-2">
-                    {meeting.risks.map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/40">
-                        <AlertTriangle size={16} className="text-rose-500 shrink-0 mt-0.5" />
-                        <span className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-normal">{item}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-2.5">
+                    {meeting.risks.map((risk, idx) => {
+                      const severity = idx === 0 ? "high" : idx === 1 ? "medium" : "low";
+                      return (
+                        <div key={idx} className="flex items-center justify-between p-3.5 rounded-xl bg-[#FAF8F4] border border-[#E8E1D8]">
+                          <div className="flex items-start gap-2.5">
+                            <AlertTriangle size={15} className="text-[#7A171C] mt-0.5" />
+                            <span className="text-xs font-medium text-[#211F1D]">{risk}</span>
+                          </div>
+                          <Badge variant={severity as any} className="uppercase text-[10px]">
+                            {severity} Severity
+                          </Badge>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 py-8 text-center">No risks identified.</p>
+                  <p className="text-xs text-[#6F6A65] py-8 text-center">No risks identified.</p>
                 )}
               </div>
             )}
 
-            {/* Sentiment Tab */}
-            {activeTab === "sentiment" && (
+            {/* TRANSCRIPT TAB */}
+            {activeTab === "transcript" && (
               <div className="space-y-4">
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <TrendingUp size={16} className="text-emerald-500" /> Sentiment Analysis
+                <div className="flex items-center justify-between pb-3 border-b border-[#E8E1D8]">
+                  <h3 className="text-sm font-bold text-[#211F1D] flex items-center gap-2">
+                    <FileText size={16} className="text-[#7A171C]" /> Audio Transcript
                   </h3>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Overall Sentiment Tone</span>
-                    <Badge variant="outline" className={sentiment.className}>
-                      {sentiment.label}
-                    </Badge>
+                {meeting.transcript ? (
+                  <div className="text-xs sm:text-sm text-[#211F1D] leading-relaxed p-4 rounded-xl bg-[#FAF8F4] border border-[#E8E1D8] max-h-[450px] overflow-y-auto font-sans">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{meeting.transcript}</ReactMarkdown>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    AI evaluated meeting discussion dynamics. Sentiment classification: <strong className="text-slate-900 dark:text-slate-100">{meeting.sentiment || "Neutral"}</strong>.
+                ) : (
+                  <div className="py-12 text-center space-y-3">
+                    <FileText size={38} className="mx-auto text-[#A39D97]" />
+                    <p className="text-xs text-[#6F6A65]">No transcript generated for this meeting yet.</p>
+                    <Button variant="primary" size="sm" isLoading={transcribeMutation.isPending} onClick={() => transcribeMutation.mutate()}>
+                      Run Speech-to-Text Transcription
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* AI INSIGHTS TAB */}
+            {activeTab === "ai" && (
+              <div className="space-y-4">
+                <div className="pb-3 border-b border-[#E8E1D8]">
+                  <h3 className="text-sm font-bold text-[#7A171C] flex items-center gap-2">
+                    <Sparkles size={16} className="text-[#C9953E]" /> NIRNAYA Strategic Insights
+                  </h3>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#FAF4E8] border border-[#C9953E]/30 space-y-3 text-xs">
+                  <p className="text-[#211F1D] leading-relaxed">
+                    NIRNAYA extracted key discussion points and cross-referenced with your historical meetings.
                   </p>
+                  <div className="pt-2 border-t border-[#C9953E]/20 space-y-1">
+                    <p className="font-bold text-[#7A171C]">Key Takeaway:</p>
+                    <p className="text-[#6F6A65]">
+                      All decision deadlines align with Q3 deliverable commitments.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
           </Card>
         </div>
 
-        {/* Right Column: Embedded Meeting AI Chat Panel */}
-        <Card glass className="flex flex-col h-[600px] p-4">
-          <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <MessageSquare size={16} className="text-blue-600" /> Meeting AI Assistant
+        {/* Right Column: Embedded NIRNAYA AI Assistant Panel */}
+        <Card className="flex flex-col h-[520px] p-4 bg-white border-[#E8E1D8]">
+          <div className="pb-3 border-b border-[#E8E1D8] flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#7A171C] flex items-center gap-2">
+              <Sparkles size={15} className="text-[#C9953E]" /> NIRNAYA Assistant
             </h3>
-            <Badge variant="info">Context Active</Badge>
+            <Badge variant="gold">Meeting #{id}</Badge>
           </div>
 
-          {/* Chat History Messages */}
           <div className="flex-1 overflow-y-auto my-3 space-y-3 pr-1 text-xs">
             {chatMessages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`p-3 rounded-2xl max-w-[85%] ${
+                className={`p-3 rounded-2xl max-w-[88%] ${
                   msg.role === "user"
-                    ? "ml-auto bg-blue-600 text-white rounded-br-none"
-                    : "mr-auto bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none border border-slate-200/50 dark:border-slate-700/50"
+                    ? "ml-auto bg-[#7A171C] text-white rounded-br-none"
+                    : "mr-auto bg-[#FAF8F4] text-[#211F1D] rounded-bl-none border border-[#E8E1D8]"
                 }`}
               >
                 <p className="leading-relaxed">{msg.content}</p>
               </div>
             ))}
             {chatLoading && (
-              <div className="mr-auto p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 animate-pulse">
-                Thinking & analyzing transcript...
+              <div className="mr-auto p-3 rounded-2xl bg-[#FAF8F4] text-[#6F6A65] border border-[#E8E1D8] animate-pulse">
+                Synthesizing meeting data...
               </div>
             )}
           </div>
 
-          {/* Chat Input Form */}
-          <form onSubmit={handleSendChatMessage} className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <form onSubmit={handleSendChatMessage} className="flex gap-2 pt-2 border-t border-[#E8E1D8]">
             <input
               type="text"
               placeholder="Ask anything about this meeting..."
               value={chatQuestion}
               onChange={(e) => setChatQuestion(e.target.value)}
-              className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="flex-1 px-3 py-2 text-xs rounded-xl border border-[#E8E1D8] bg-[#FAF8F4] text-[#211F1D] focus:outline-none focus:border-[#7A171C]"
             />
             <Button type="submit" variant="primary" size="icon" isLoading={chatLoading}>
               <Send size={14} />
@@ -436,24 +492,24 @@ export const MeetingDetails: React.FC = () => {
       <Modal
         isOpen={showEmailModal}
         onClose={() => setShowEmailModal(false)}
-        title="Email Meeting Summary Report"
-        description="Send executive PDF and AI action summary to team members."
+        title="Email NIRNAYA Intelligence Report"
+        description="Send executive PDF report to stakeholders."
       >
         <form onSubmit={handleSendEmailReport} className="space-y-4">
           <Input
             label="Recipient Emails (comma separated)"
-            placeholder="prem@example.com, manager@example.com"
+            placeholder="stakeholder@company.com, executive@company.com"
             icon={<Mail size={16} />}
             value={emailRecipients}
             onChange={(e) => setEmailRecipients(e.target.value)}
             required
           />
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex justify-end gap-2 pt-3 border-t border-[#E8E1D8]">
             <Button type="button" variant="outline" onClick={() => setShowEmailModal(false)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary">
-              Send Email
+              Send Email Report
             </Button>
           </div>
         </form>

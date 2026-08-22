@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(dateString?: string): string {
+export function formatDate(dateString?: string | null): string {
   if (!dateString) return "N/A";
   try {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -18,7 +18,7 @@ export function formatDate(dateString?: string): string {
   }
 }
 
-export function formatDateTime(dateString?: string): string {
+export function formatDateTime(dateString?: string | null): string {
   if (!dateString) return "N/A";
   try {
     return new Date(dateString).toLocaleString("en-US", {
@@ -42,20 +42,20 @@ export function getSentimentBadge(sentiment?: string | null): {
   if (normalized.includes("positive") || normalized.includes("good")) {
     return {
       label: "Positive",
-      className: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/60",
-      dotColor: "bg-emerald-500",
+      className: "bg-[#FAF4E8] text-[#9A6F27] border-[#C9953E]/30",
+      dotColor: "bg-[#C9953E]",
     };
   }
   if (normalized.includes("negative") || normalized.includes("bad") || normalized.includes("risk")) {
     return {
       label: "Negative",
-      className: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/60",
-      dotColor: "bg-rose-500",
+      className: "bg-[#F7EDED] text-[#7A171C] border-[#7A171C]/20",
+      dotColor: "bg-[#7A171C]",
     };
   }
   return {
     label: sentiment || "Neutral",
-    className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60",
-    dotColor: "bg-amber-500",
+    className: "bg-[#FAF8F4] text-[#6F6A65] border-[#E8E1D8]",
+    dotColor: "bg-[#A39D97]",
   };
 }

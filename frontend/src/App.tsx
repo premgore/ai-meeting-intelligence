@@ -11,6 +11,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Meetings from "./pages/meetings/Meetings";
 import MeetingDetails from "./pages/meetings/MeetingDetails";
 import Chat from "./pages/chat/Chat";
+import ActionItems from "./pages/action-items/ActionItems";
 import Upload from "./pages/upload/Upload";
 import Analytics from "./pages/analytics/Analytics";
 import Reports from "./pages/reports/Reports";
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/meetings" element={<Meetings />} />
           <Route path="/meetings/:id" element={<MeetingDetails />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/action-items" element={<ActionItems />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/reports" element={<Reports />} />

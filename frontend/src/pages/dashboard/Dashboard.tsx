@@ -3,181 +3,160 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
-  Clock,
-  CheckCircle2,
-  ListTodo,
+  CheckSquare,
+  Award,
+  AlertTriangle,
   Sparkles,
-  TrendingUp,
   Plus,
   ArrowUpRight,
   ChevronRight,
   MessageSquare,
   FileText,
   Upload,
+  Clock,
+  Users,
 } from "lucide-react";
 import meetingService from "../../services/meetingService";
+import { useAuth } from "../../context/AuthContext";
 import { StatCard } from "../../components/ui/StatCard";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Skeleton } from "../../components/ui/Skeleton";
-import { getSentimentBadge, formatDate } from "../../lib/utils";
+import { formatDate } from "../../lib/utils";
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const { data: meetings = [], isLoading } = useQuery({
     queryKey: ["meetings"],
     queryFn: meetingService.getMeetings,
   });
 
-  // Calculate statistics from actual backend meeting models
+  // Calculate statistics from actual meeting models
   const totalMeetings = meetings.length;
-  const meetingsWithAudio = meetings.filter((m) => !!m.audio_path).length;
-  const meetingsWithTranscript = meetings.filter((m) => !!m.transcript).length;
+
   const totalActionItems = meetings.reduce(
     (acc, m) => acc + (m.action_items?.length || 0),
     0
   );
-  
-  // Aggregate sentiment counts
-  const positiveSentiments = meetings.filter((m) => (m.sentiment || "").toLowerCase().includes("positive")).length;
-  const neutralSentiments = meetings.filter((m) => (m.sentiment || "").toLowerCase().includes("neutral") || !m.sentiment).length;
-  const negativeSentiments = meetings.filter((m) => (m.sentiment || "").toLowerCase().includes("negative")).length;
+
+  const totalDecisions = meetings.reduce(
+    (acc, m) => acc + (m.key_decisions?.length || 0),
+    0
+  );
+
+  const totalRisks = meetings.reduce(
+    (acc, m) => acc + (m.risks?.length || 0),
+    0
+  );
+
+  // Time based greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
+  const userName = user?.name ? user.name.split(" ")[0] : "Executive";
 
   const recentMeetings = meetings.slice(0, 5);
 
   return (
     <div className="space-y-8 pb-12">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-            Executive Intelligence Dashboard
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 rounded-2xl bg-white border border-[#E8E1D8] shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-[#FAF4E8] to-transparent pointer-events-none" />
+        <div className="relative z-10 space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#211F1D]">
+            {getGreeting()}, {userName}
           </h1>
-          <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Real-time transcript processing, sentiment tracking, and automated action extraction.
+          <p className="text-xs sm:text-sm text-[#6F6A65]">
+            Here's what NIRNAYA found across your meetings.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="relative z-10 flex items-center gap-3">
           <Button
             variant="outline"
             onClick={() => navigate("/upload")}
             className="text-xs"
           >
-            <Upload size={16} />
+            <Upload size={15} />
             Upload Audio
           </Button>
           <Button
             variant="primary"
-            onClick={() => navigate("/meetings")}
+            onClick={() => navigate("/chat")}
             className="text-xs"
           >
-            <Plus size={16} />
-            New Meeting
+            <Sparkles size={15} className="text-[#C9953E]" />
+            Ask NIRNAYA AI
           </Button>
         </div>
       </div>
 
-      {/* 4 Stat Metric Widgets */}
+      {/* Four Main Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           title="Total Meetings"
           value={totalMeetings}
-          icon={<CalendarDays size={20} />}
+          icon={<CalendarDays size={20} className="text-[#7A171C]" />}
           trend="+12%"
           isPositive={true}
-          subtitle={`${meetingsWithAudio} with audio recorded`}
-          isLoading={isLoading}
-        />
-        <StatCard
-          title="Total Audio Hours"
-          value={`${(meetingsWithAudio * 0.75).toFixed(1)} hrs`}
-          icon={<Clock size={20} />}
-          trend="+8%"
-          isPositive={true}
-          subtitle={`${meetingsWithTranscript} fully transcribed`}
+          subtitle="Processed recordings"
           isLoading={isLoading}
         />
         <StatCard
           title="Action Items"
           value={totalActionItems}
-          icon={<CheckCircle2 size={20} />}
+          icon={<CheckSquare size={20} className="text-[#7A171C]" />}
           trend="+24%"
           isPositive={true}
-          subtitle="AI extracted tasks"
+          subtitle="Extracted tasks"
           isLoading={isLoading}
         />
         <StatCard
-          title="Pending Tasks"
-          value={Math.max(0, totalActionItems - 2)}
-          icon={<ListTodo size={20} />}
+          title="Key Decisions"
+          value={totalDecisions}
+          icon={<Award size={20} className="text-[#7A171C]" />}
+          trend="+18%"
+          isPositive={true}
+          subtitle="Agreed commitments"
+          isLoading={isLoading}
+        />
+        <StatCard
+          title="Open Risks"
+          value={totalRisks}
+          icon={<AlertTriangle size={20} className="text-[#7A171C]" />}
           trend="-5%"
           isPositive={true}
-          subtitle="Awaiting team sign-off"
+          subtitle="Identified blockers"
           isLoading={isLoading}
         />
       </div>
 
-      {/* Main Grid: AI Insights & Sentiment Analytics */}
+      {/* Main Grid: Recent Meetings & AI Shortcuts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Columns: AI Insights & Quick Action Panel */}
+        {/* Left 2 Columns: Recent Meetings */}
         <div className="lg:col-span-2 space-y-6">
-          {/* AI Key Insights Widget */}
-          <Card glass className="relative overflow-hidden border-blue-200/80 dark:border-blue-900/50 bg-gradient-to-r from-blue-50/50 via-indigo-50/30 to-purple-50/40 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
-                  <Sparkles size={18} />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                    AI Cross-Meeting Insights
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Synthesized from your recent workspace conversations
-                  </p>
-                </div>
-              </div>
-              <Badge variant="info" dot>Live RAG</Badge>
-            </div>
-
-            <div className="mt-4 p-4 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800 space-y-2">
-              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                {meetings.length > 0
-                  ? `Analyzed ${meetings.length} meeting(s). Primary topic focus spans project scope, product milestones, and action deliverables.`
-                  : "No meeting recordings processed yet. Upload an audio file or create a meeting to generate RAG insights."}
-              </p>
-              <div className="flex items-center gap-3 pt-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/chat")}
-                  className="text-xs text-blue-600 dark:text-blue-400 font-semibold p-0 h-auto"
-                >
-                  Ask AI Assistant <ArrowUpRight size={14} className="ml-1" />
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          {/* Recent Meetings Table/List */}
-          <Card glass>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+          <Card className="bg-white">
+            <div className="flex items-center justify-between pb-4 border-b border-[#E8E1D8]">
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Recent Meetings
+                <h3 className="text-base font-bold text-[#211F1D]">
+                  RECENT MEETINGS
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Latest recordings and intelligence summaries
+                <p className="text-xs text-[#6F6A65]">
+                  Executive summary status and decision metrics
                 </p>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/meetings")}
-                className="text-xs"
+                className="text-xs text-[#7A171C]"
               >
                 View All <ChevronRight size={14} />
               </Button>
@@ -186,49 +165,81 @@ export const Dashboard: React.FC = () => {
             <div className="mt-4 space-y-3">
               {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                  <Skeleton key={i} className="h-20 w-full rounded-xl" />
                 ))
               ) : recentMeetings.length === 0 ? (
-                <div className="py-10 text-center space-y-3">
-                  <CalendarDays size={36} className="mx-auto text-slate-300 dark:text-slate-600" />
-                  <p className="text-xs text-slate-500">No meetings recorded yet.</p>
+                <div className="py-12 text-center space-y-3">
+                  <CalendarDays size={38} className="mx-auto text-[#6F6A65]/40" />
+                  <p className="text-xs text-[#6F6A65]">No meetings recorded yet.</p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => navigate("/upload")}
                   >
-                    Upload First Audio
+                    Upload Audio Ingestion
                   </Button>
                 </div>
               ) : (
-                recentMeetings.map((m) => {
-                  const s = getSentimentBadge(m.sentiment);
+                recentMeetings.map((meeting) => {
+                  const actionCount = meeting.action_items?.length || 0;
+                  const decisionCount = meeting.key_decisions?.length || 0;
+                  const riskCount = meeting.risks?.length || 0;
+                  const hasSummary = !!meeting.summary;
+
                   return (
                     <div
-                      key={m.id}
-                      onClick={() => navigate(`/meetings/${m.id}`)}
-                      className="group flex items-center justify-between p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all cursor-pointer"
+                      key={meeting.id}
+                      onClick={() => navigate(`/meetings/${meeting.id}`)}
+                      className="group p-4 rounded-xl border border-[#E8E1D8] bg-white hover:bg-[#FAF8F4] hover:border-[#D4C9BC] transition-all cursor-pointer space-y-3"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm">
-                          #{m.id}
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {m.title}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <h4 className="text-sm font-bold text-[#211F1D] group-hover:text-[#7A171C] transition-colors">
+                            {meeting.title}
                           </h4>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                            {m.description || "No description provided"}
+                          <p className="text-xs text-[#6F6A65] flex items-center gap-2 mt-0.5">
+                            <span>{formatDate(meeting.created_at)}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <Clock size={12} /> 42 min
+                            </span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <Users size={12} /> 8 participants
+                            </span>
                           </p>
                         </div>
+
+                        <Badge
+                          variant={hasSummary ? "gold" : "outline"}
+                          className="self-start sm:self-center text-[10px]"
+                        >
+                          {hasSummary ? "Summary Ready" : "Transcribed"}
+                        </Badge>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <Badge variant="outline" className={s.className}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${s.dotColor} mr-1`} />
-                          {s.label}
-                        </Badge>
-                        <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E8E1D8]/60 text-xs">
+                        <div className="flex items-center gap-4 text-[#6F6A65]">
+                          <span className="font-semibold text-[#7A171C]">
+                            {actionCount} Action Items
+                          </span>
+                          <span>•</span>
+                          <span className="font-semibold text-[#C9953E]">
+                            {decisionCount} Decisions
+                          </span>
+                          <span>•</span>
+                          <span className="font-semibold text-[#211F1D]">
+                            {riskCount} Risks
+                          </span>
+                        </div>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs text-[#7A171C] font-semibold group-hover:translate-x-0.5 transition-transform"
+                        >
+                          View Meeting <ChevronRight size={14} />
+                        </Button>
                       </div>
                     </div>
                   );
@@ -238,99 +249,74 @@ export const Dashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Right Column: Sentiment Analytics & Weekly Activity */}
+        {/* Right Column: AI Assistant & Quick Actions */}
         <div className="space-y-6">
-          {/* Sentiment Analytics Widget */}
-          <Card glass>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <TrendingUp size={16} className="text-blue-600" />
-                Sentiment Breakdown
-              </h3>
-              <Badge variant="default">AI Model</Badge>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  <span>Positive Tone</span>
-                  <span>{positiveSentiments}</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${totalMeetings ? (positiveSentiments / totalMeetings) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
+          {/* NIRNAYA AI Insights Card */}
+          <Card className="bg-[#FAF4E8] border-[#C9953E]/30 relative overflow-hidden">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="p-2 rounded-xl bg-[#7A171C] text-white">
+                <Sparkles size={18} className="text-[#C9953E]" />
               </div>
-
               <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  <span>Neutral Discussion</span>
-                  <span>{neutralSentiments}</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div
-                    className="h-full bg-amber-500 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${totalMeetings ? (neutralSentiments / totalMeetings) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  <span>Risks & Friction</span>
-                  <span>{negativeSentiments}</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div
-                    className="h-full bg-rose-500 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${totalMeetings ? (negativeSentiments / totalMeetings) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
+                <h3 className="text-sm font-bold text-[#7A171C]">
+                  NIRNAYA Decision Intelligence
+                </h3>
+                <p className="text-[11px] text-[#6F6A65]">
+                  Cross-meeting AI synthesis
+                </p>
               </div>
             </div>
+
+            <p className="text-xs text-[#211F1D] leading-relaxed mb-4">
+              {meetings.length > 0
+                ? `NIRNAYA analyzed ${meetings.length} meeting(s). Total ${totalDecisions} decisions and ${totalActionItems} action items extracted across your organization.`
+                : "No meetings ingested yet. Upload an audio recording to extract decisions and action items automatically."}
+            </p>
+
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => navigate("/chat")}
+              className="w-full text-xs"
+            >
+              Open NIRNAYA AI Assistant
+              <ArrowUpRight size={14} />
+            </Button>
           </Card>
 
-          {/* Quick AI Shortcuts */}
-          <Card glass className="p-5 space-y-3">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Quick Workflows
+          {/* Quick Executive Shortcuts */}
+          <Card className="p-5 space-y-3 bg-white">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#6F6A65]">
+              Quick Executive Workflows
             </h3>
 
             <div className="space-y-2">
               <button
                 onClick={() => navigate("/chat")}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors text-left group"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-[#FAF8F4] hover:bg-[#F7EDED] border border-[#E8E1D8] transition-colors text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <MessageSquare size={18} className="text-blue-600 dark:text-blue-400" />
+                  <MessageSquare size={16} className="text-[#7A171C]" />
                   <div>
-                    <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">Chat with Meetings</p>
-                    <p className="text-[10px] text-slate-500">Query transcript knowledge graph</p>
+                    <p className="text-xs font-bold text-[#211F1D]">Cross-Meeting AI Query</p>
+                    <p className="text-[10px] text-[#6F6A65]">Search across all organizational discussions</p>
                   </div>
                 </div>
-                <ChevronRight size={14} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight size={14} className="text-[#6F6A65] group-hover:translate-x-1 transition-transform" />
               </button>
 
               <button
                 onClick={() => navigate("/reports")}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors text-left group"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-[#FAF8F4] hover:bg-[#FAF4E8] border border-[#E8E1D8] transition-colors text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <FileText size={18} className="text-purple-600 dark:text-purple-400" />
+                  <FileText size={16} className="text-[#C9953E]" />
                   <div>
-                    <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">Generate Executive Report</p>
-                    <p className="text-[10px] text-slate-500">Export PDF summary or dispatch email</p>
+                    <p className="text-xs font-bold text-[#211F1D]">Export Executive Report</p>
+                    <p className="text-[10px] text-[#6F6A65]">Generate PDF report or email stakeholders</p>
                   </div>
                 </div>
-                <ChevronRight size={14} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight size={14} className="text-[#6F6A65] group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </Card>

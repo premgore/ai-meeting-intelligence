@@ -48,7 +48,7 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
     try {
       setLoading(true);
       await meetingService.createMeeting(data);
-      toast.success("Meeting created successfully!");
+      toast.success("Meeting initialized successfully!");
       reset();
       onClose();
       if (onSuccess) onSuccess();
@@ -64,33 +64,33 @@ export const CreateMeetingModal: React.FC<CreateMeetingModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Create New Meeting"
-      description="Initialize a new meeting space to record, transcribe, and analyze discussions."
+      description="Initialize an executive meeting space to record, transcribe, and extract decisions."
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input
           label="Meeting Title"
-          placeholder="Q3 Product Roadmap Review"
+          placeholder="Q3 Strategic Roadmap Review"
           icon={<CalendarDays size={16} />}
           error={errors.title?.message}
           {...register("title")}
         />
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-            Description / Context
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#6F6A65]">
+            Description / Executive Context
           </label>
           <textarea
             rows={4}
-            placeholder="Discuss key features, deliverables, timelines, and resource allocation..."
-            className="w-full rounded-xl border border-slate-200 bg-white/80 dark:bg-slate-900/80 p-3 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800"
+            placeholder="Key objectives, agenda topics, attendees, and expected deliverables..."
+            className="w-full rounded-xl border border-[#E8E1D8] bg-white p-3 text-sm text-[#211F1D] placeholder-[#A39D97] transition-all focus:border-[#7A171C] focus:outline-none focus:ring-2 focus:ring-[#7A171C]/15"
             {...register("description")}
           />
           {errors.description && (
-            <p className="text-xs text-red-500">{errors.description.message}</p>
+            <p className="text-xs text-rose-600 font-medium">{errors.description.message}</p>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E8E1D8]">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>

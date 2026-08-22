@@ -19,6 +19,7 @@ export interface Meeting {
   key_decisions?: string[] | null;
   risks?: string[] | null;
   sentiment?: SentimentType | null;
+  created_at?: string | null;
 }
 
 export interface ApiResponse<T> {
